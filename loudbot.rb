@@ -73,7 +73,7 @@ end
 # respond to loud commands)
 def do_command(command, e)
   case command
-    when "DONGME"         then send_dong(e.channel, e.msg.user.hash + e.msg.host.hash)
+    when "DONGME"         then send_dong(e.channel, (Time.now.to_i % 86400).to_s + e.msg.user.hash + e.msg.host.hash)
     when "UPVOTE"         then vote(1)
     when "DOWNVOTE"       then vote(-1)
     when "SCORE"          then score(e.channel)
