@@ -83,7 +83,8 @@ end
 # Here we're using the ping filter to actually do the serialization of our messages hash.  Since
 # we know pings are regular, this is kind of a hack to serialize every few minutes.
 @irc.heard_ping do
-  unless @dirty_messages
+  if @dirty_messages
+    @irc.log.debug "ATTEMPTING TO SERIALIZE MESSAGES"
     File.open("louds.yml", "w") {|f| f.puts @messages.to_yaml}
     @dirty_messages = false
   end
