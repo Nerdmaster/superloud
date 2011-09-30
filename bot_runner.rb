@@ -53,6 +53,8 @@ end
 @random_messages = @messages.keys.shuffle
 @last_message = nil
 @dirty_messages = false
+@redongs = Hash.new(0)
+@last_ping = Date.today
 
 # If --debug is passed on the command line, we spew lots of filth at the user
 @irc.log.level = Logger::DEBUG if opt['debug']
@@ -87,6 +89,12 @@ end
     @irc.log.debug "ATTEMPTING TO SERIALIZE MESSAGES"
     File.open("louds.yml", "w") {|f| f.puts @messages.to_yaml}
     @dirty_messages = false
+  end
+
+  # Reset any daily stuffs
+  if @last_ping != Date.today
+    @last_ping = Date.today
+    @redongs = Hash.new(0)
   end
 end
 

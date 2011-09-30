@@ -41,8 +41,14 @@ end
 
 # Just keepin' the plagiarism alive, man.  At least in my version, size is always based on requester.
 def send_dong(channel, user_hash)
-  old_seed = srand(user_hash)
-  @irc.msg(channel, "8" + ('=' * (rand(20).to_i + 8)) + "D")
+  mulligans = @redongs[user_hash]
+  old_seed = srand(user_hash + (Time.now.to_i / 86400) + mulligans * 53)
+
+  # -2 to size for each !REDONGME command
+  size_modifier = mulligans * -2
+  size = [2, rand(20).to_i + 8 + size_modifier].max
+
+  @irc.msg(channel, "8%sD" % ['=' * size])
   srand(old_seed)
 end
 
@@ -69,15 +75,24 @@ def score(channel)
   @irc.msg(channel, "#{@last_message}: #{@messages[@last_message]}")
 end
 
+# Takes an event message and returns a semi-unique hash number representing the user + host
+def user_hash(message)
+  return message.user.hash + message.host.hash
+end
+
 # Handles a command (string begins with ! - to keep with the pattern, I'm making our loudbot only
 # respond to loud commands)
 def do_command(command, e)
   case command
-    when "DONGME"         then send_dong(e.channel, (Time.now.to_i / 86400) + e.msg.user.hash + e.msg.host.hash)
+    when "REDONGME"
+      @redongs[user_hash(e.msg)] += 1
+      send_dong(e.channel, user_hash(e.msg))
+
+    when "DONGME"         then send_dong(e.channel, user_hash(e.msg))
     when "UPVOTE"         then vote(1)
     when "DOWNVOTE"       then vote(-1)
     when "SCORE"          then score(e.channel)
-    when "HELP"           then @irc.msg(e.channel, "I HAVE COMMANDS AND THEY ARE !DONGME !UPVOTE !DOWNVOTE !SCORE AND !HELP")
+    when "HELP"           then @irc.msg(e.channel, "I HAVE COMMANDS AND THEY ARE !DONGME !REDONGME !UPVOTE !DOWNVOTE !SCORE AND !HELP")
   end
 
   # Here we're saying that we don't want any other handling run - no filters, no handler.  For
