@@ -26,7 +26,7 @@ def incoming_message(e)
   uppercase_count = text.scan(/[A-Z]/).length
   space_count = text.scan(/\s/).length
 
-  if len >= 11 && uppercase_count >= (len * 0.60) && space_count >= 1
+  if len >= 11 && uppercase_count >= (len * 0.60) && space_count >= 1 && text !~ /retard/i
     it_was_loud(e.message, e.channel)
   end
 end
