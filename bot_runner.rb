@@ -56,6 +56,7 @@ end
 @dirty_messages = false
 @redongs = Hash.new(0)
 @last_ping = Date.today
+@big_winner = Hash.new(0)
 
 # If --debug is passed on the command line, we spew lots of filth at the user
 @irc.log.level = Logger::DEBUG if opt['debug']
@@ -94,6 +95,7 @@ end
 
   # Reset any daily stuffs
   if @last_ping != Date.today
+    @big_winner = Hash.new(0)
     @last_ping = Date.today
     @redongs = Hash.new(0)
   end

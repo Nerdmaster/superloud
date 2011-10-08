@@ -3,12 +3,27 @@
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongme, :redongme, :upvote, :downvote, :score, :help
+  :dongme, :redongme, :upvote, :downvote, :score, :help, :rockpaperscissors, :biggestdong
 ]
 
 #####
 # Command handlers
 #####
+
+def rockpaperscissors(e)
+  @irc.msg(e.channel, "I AM SORRY BUT YOU CANNOT DO THIS YET OKAY")
+end
+
+def biggestdong(e)
+  if @big_winner[:size] > 0
+    nick = @big_winner[:nick]
+    cm = @big_winner[:size]
+    inches = cm / 2.54
+    @irc.msg(e.channel, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH WAS %0.1f INCHES (%d CM)" % [inches, cm])
+  else
+    @irc.msg(e.channel, "ONOES NO DONGS TODAY SIRS")
+  end
+end
 
 def dongme(e)
   send_dong(e)
@@ -63,6 +78,11 @@ def send_dong(e)
   # -2 to size for each !REDONGME command
   size_modifier = mulligans * -2
   size = [2, rand(20).to_i + 8 + size_modifier].max
+
+  # Save this as today's winner if it's the best we've seen so far
+  if @big_winner[:size] < size
+    @big_winner = {:nick => e.nick, :size => size}
+  end
 
   @irc.msg(channel, "8%sD" % ['=' * size])
   srand(old_seed)
