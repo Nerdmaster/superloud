@@ -21,6 +21,7 @@ require 'getopt/long'
 require 'shuffle'
 
 # Pulls in all of loudbot's methods - filter/callback handlers for IRC events
+require 'commands'
 require 'loudbot'
 
 # User specifies network, channel and nick
@@ -101,7 +102,7 @@ end
 # This is a before-filter - using the present tense means it's a before-filter, and using a tense
 # of "hear" means it's for incoming messages (as opposed to "saying" and "said", where we'd filter
 # our outgoing messages).  Here we intercept all potential commands and send them to a method.
-@irc.hearing_msg {|e| do_command($1, e) if e.message =~ /^!(.*)$/ }
+@irc.hearing_msg {|e| do_command($1, e) if e.message =~ /^!([A-Z]+)/ }
 
 # Another filter, but in-line this time - we intercept messages directly to the bot.  The call to
 # +handled!+ tells the event not to run any more filters or the main callback.
