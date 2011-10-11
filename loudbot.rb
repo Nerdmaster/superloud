@@ -1,3 +1,28 @@
+# Sets up one-time data when loudbot starts
+def init_data
+  # Loud messages can be newline-separated strings in louds.txt or an array or hash serialized in
+  # louds.yml.  If messages are an array, we convert all of them to hash keys with a score of 1.
+  @messages = FileTest.exist?("louds.yml") ? YAML.load_file("louds.yml") :
+              FileTest.exist?("louds.txt") ? IO.readlines("louds.txt") :
+              {"ROCK ON WITH SUPERLOUD" => 1}
+  if Array === @messages
+    dupes = @messages.dup
+    @messages = {}
+    dupes.each {|string| @messages[string.strip] = 1}
+  end
+
+  @random_messages = @messages.keys.shuffle
+end
+
+# Sets up data on init and each day
+def init_daily_data
+  @big_winner = Hash.new(0)
+  @last_message = nil
+  @dirty_messages = false
+  @redongs = Hash.new(0)
+  @last_ping_day = Date.today
+end
+
 # Stores a LOUD message into the hash and responds.
 def it_was_loud(message, channel)
   @irc.log.debug "IT WAS LOUD!  #{message.inspect}"

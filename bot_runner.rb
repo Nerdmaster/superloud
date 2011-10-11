@@ -40,26 +40,14 @@ opt = Getopt::Long.getopts(
   :nicknames  => [opt['nick'] || "SUPERLOUD"]
 )
 
-# Loud messages can be newline-separated strings in louds.txt or an array or hash serialized in
-# louds.yml.  If messages are an array, we convert all of them to hash keys with a score of 1.
-@messages = FileTest.exist?("louds.yml") ? YAML.load_file("louds.yml") :
-            FileTest.exist?("louds.txt") ? IO.readlines("louds.txt") :
-            {"ROCK ON WITH SUPERLOUD" => 1}
-if Array === @messages
-  dupes = @messages.dup
-  @messages = {}
-  dupes.each {|string| @messages[string.strip] = 1}
-end
-
-@random_messages = @messages.keys.shuffle
-@last_message = nil
-@dirty_messages = false
-@redongs = Hash.new(0)
-@last_ping = Date.today
-@big_winner = Hash.new(0)
-
 # If --debug is passed on the command line, we spew lots of filth at the user
 @irc.log.level = Logger::DEBUG if opt['debug']
+
+# Initialize all louds data
+init_data
+
+# Init data which changes daily
+init_daily_data
 
 #####
 #
@@ -94,10 +82,8 @@ end
   end
 
   # Reset any daily stuffs
-  if @last_ping != Date.today
-    @big_winner = Hash.new(0)
-    @last_ping = Date.today
-    @redongs = Hash.new(0)
+  if @last_ping_day != Date.today
+    init_daily_data
   end
 end
 
