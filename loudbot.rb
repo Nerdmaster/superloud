@@ -16,7 +16,7 @@ end
 
 # Sets up data on init and each day
 def init_daily_data
-  @big_winner = Hash.new(0)
+  @size_data = {}
   @last_message = nil
   @dirty_messages = false
   @redongs = Hash.new(0)

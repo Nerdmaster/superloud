@@ -15,14 +15,20 @@ def rockpaperscissors(e)
 end
 
 def biggestdong(e)
-  if @big_winner[:size] > 0
-    nick = @big_winner[:nick]
-    cm = @big_winner[:size]
-    inches = cm / 2.54
-    @irc.msg(e.channel, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH WAS %0.1f INCHES (%d CM)" % [inches, cm])
-  else
+  if @size_data.empty?
     @irc.msg(e.channel, "ONOES NO DONGS TODAY SIRS")
+    return
   end
+
+  big_winner = Hash.new(0)
+  for user_hash, data in @size_data
+    big_winner = data if big_winner[:size] < data[:size]
+  end
+
+  nick = big_winner[:nick]
+  cm = big_winner[:size]
+  inches = cm / 2.54
+  @irc.msg(e.channel, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH WAS %0.1f INCHES (%d CM)" % [inches, cm])
 end
 
 def dongme(e)
@@ -31,7 +37,13 @@ end
 
 # Increments rerolls and sends inappropriate imagery
 def redongme(e)
+  # Clear old size data for this user
+  @size_data[user_hash(e.msg)] = Hash.new(0)
+
+  # Increment mulligan count
   @redongs[user_hash(e.msg)] += 1
+
+  # Send a BRAND NEW DONG!!!
   send_dong(e)
 end
 
@@ -68,24 +80,30 @@ def user_hash(message)
   return message.user.hash + message.host.hash
 end
 
-# Just keepin' the plagiarism alive, man.  At least in my version, size is always based on requester.
-def send_dong(e)
-  channel = e.channel
+# Computes size for a given event message.  Stores data into list of sizes for the day.
+def compute_size(e)
   user_hash = user_hash(e.msg)
   mulligans = @redongs[user_hash]
-  old_seed = srand(user_hash + (Time.now.to_i / 86400) + mulligans * 53)
 
   # -2 to size for each !REDONGME command
   size_modifier = mulligans * -2
+
+  # Get size by using daily seed
+  old_seed = srand(user_hash + Date.today.strftime("%Y%m%d").to_i + mulligans * 53)
   size = [2, rand(20).to_i + 8 + size_modifier].max
-
-  # Save this as today's winner if it's the best we've seen so far
-  if @big_winner[:size] < size
-    @big_winner = {:nick => e.nick, :size => size}
-  end
-
-  @irc.msg(channel, "8%sD" % ['=' * size])
   srand(old_seed)
+
+  @size_data[user_hash] = {:size => size, :nick => e.nick}
+
+  return size
+end
+
+# Just keepin' the plagiarism alive, man.  At least in my version, size is always based on requester.
+def send_dong(e)
+  size = compute_size(e)
+
+  channel = e.channel
+  @irc.msg(channel, "8%sD" % ['=' * size])
 end
 
 # Adds +value+ to the score of the last message, if there was one.  If the score goes too low, we
