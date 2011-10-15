@@ -80,6 +80,14 @@ def user_hash(message)
   return message.user.hash + message.host.hash
 end
 
+# Computes and seeds RNG with the given event's user hash combined with today's date and optional
+# added value, yields to the passed-in block, and then resets the seed to the old value.
+def user_seed(user_hash, add)
+  old_seed = srand(user_hash + Date.today.strftime("%Y%m%d").to_i + add)
+  yield
+  srand(old_seed)
+end
+
 # Computes size for a given event message.  Stores data into list of sizes for the day.
 def compute_size(e)
   user_hash = user_hash(e.msg)
@@ -89,9 +97,10 @@ def compute_size(e)
   size_modifier = mulligans * -2
 
   # Get size by using daily seed
-  old_seed = srand(user_hash + Date.today.strftime("%Y%m%d").to_i + mulligans * 53)
-  size = [2, rand(20).to_i + 8 + size_modifier].max
-  srand(old_seed)
+  size = 0
+  user_seed(user_hash, mulligans * 53) do
+    size = [2, rand(20).to_i + 8 + size_modifier].max
+  end
 
   @size_data[user_hash] = {:size => size, :nick => e.nick}
 
