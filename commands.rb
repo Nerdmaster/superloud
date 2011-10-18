@@ -10,13 +10,13 @@ VALID_COMMANDS = [
 # Command handlers
 #####
 
-def rockpaperscissors(e)
+def rockpaperscissors(e, params)
   @irc.msg(e.channel, "I AM SORRY BUT YOU CANNOT DO THIS YET OKAY")
 end
 
-def biggestdong(e)
+def biggestdong(e, params)
   if @size_data.empty?
-    @irc.msg(e.channel, "ONOES NO DONGS TODAY SIRS")
+    @irc.msg(e.channel || e.nick, "ONOES NO DONGS TODAY SIRS")
     return
   end
 
@@ -28,15 +28,15 @@ def biggestdong(e)
   nick = big_winner[:nick]
   cm = big_winner[:size]
   inches = cm / 2.54
-  @irc.msg(e.channel, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH WAS %0.1f INCHES (%d CM)" % [inches, cm])
+  @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH WAS %0.1f INCHES (%d CM)" % [inches, cm])
 end
 
-def dongme(e)
+def dongme(e, params)
   send_dong(e)
 end
 
 # Increments rerolls and sends inappropriate imagery
-def redongme(e)
+def redongme(e, params)
   # Clear old size data for this user
   @size_data[user_hash(e.msg)] = Hash.new(0)
 
@@ -48,27 +48,27 @@ def redongme(e)
 end
 
 # Votes the current message +1
-def upvote(e)
+def upvote(e, params)
   vote(1)
 end
 
-def downvote(e)
+def downvote(e, params)
   vote(-1)
 end
 
 # Reports the last message's score
-def score(e)
+def score(e, params)
   if !@last_message
-    @irc.msg(e.channel, "NO LAST MESSAGE OR IT WAS DELETED BY !DOWNVOTE")
+    @irc.msg(e.channel || e.nick, "NO LAST MESSAGE OR IT WAS DELETED BY !DOWNVOTE")
     return
   end
 
-  @irc.msg(e.channel, "#{@last_message}: #{@messages[@last_message]}")
+  @irc.msg(e.channel || e.nick, "#{@last_message}: #{@messages[@last_message]}")
 end
 
-def help(e)
+def help(e, params)
   commands = VALID_COMMANDS.collect {|cmd| "!" + cmd.to_s.upcase}.join(" ")
-  @irc.msg(e.channel, "I HAVE COMMANDS AND THEY ARE: #{commands}")
+  @irc.msg(e.channel || e.nick, "I HAVE COMMANDS AND THEY ARE: #{commands}")
 end
 
 #####
@@ -110,9 +110,7 @@ end
 # Just keepin' the plagiarism alive, man.  At least in my version, size is always based on requester.
 def send_dong(e)
   size = compute_size(e)
-
-  channel = e.channel
-  @irc.msg(channel, "8%sD" % ['=' * size])
+  @irc.msg(e.channel || e.nick, "8%sD" % ['=' * size])
 end
 
 # Adds +value+ to the score of the last message, if there was one.  If the score goes too low, we

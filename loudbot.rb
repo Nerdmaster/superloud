@@ -66,17 +66,14 @@ end
 
 # Handles a command (string begins with ! - to keep with the pattern, I'm making our loudbot only
 # respond to loud commands)
-def do_command(command, e)
-  # Commands must be all-caps
-  return unless command =~ /\A[A-Z]+\Z/
-
+def do_command(e, command, params)
   # Convert to a method symbol
   command = command.downcase.to_sym
 
   # If valid, send it off
   if VALID_COMMANDS.include?(command)
     method = self.method(command)
-    method.call(e)
+    method.call(e, params)
   end
 
   # Here we're saying that we don't want any other handling run - no filters, no handler.  For

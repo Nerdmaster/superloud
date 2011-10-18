@@ -90,7 +90,15 @@ end
 # This is a before-filter - using the present tense means it's a before-filter, and using a tense
 # of "hear" means it's for incoming messages (as opposed to "saying" and "said", where we'd filter
 # our outgoing messages).  Here we intercept all potential commands and send them to a method.
-@irc.hearing_msg {|e| do_command($1, e) if e.message =~ /^!([A-Z]+)/ }
+@irc.hearing_msg do |e|
+  (command, *params) = e.message.split(/\s+/)
+  next unless command =~ /^!/
+
+  command.sub!(/^!/, "")
+  next unless command.upcase.strip == command
+
+  do_command(e, command, params)
+end
 
 # Another filter, but in-line this time - we intercept messages directly to the bot.  The call to
 # +handled!+ tells the event not to run any more filters or the main callback.
