@@ -66,7 +66,10 @@ init_daily_data
 
 # This is just another callback, using the do/end block form.  We auto-message the channel on join.
 @irc.on_join do |e|
-  @irc.msg(e.channel, "WHATS WRONG WITH BEING SEXY") if e.nick == @irc.me
+  if e.nick == @irc.me
+    @irc.msg(e.channel, "WHATS WRONG WITH BEING SEXY")
+    @channel_list.push(e.channel)
+  end
 end
 
 # You should *never* override the on_ping callback unless you handle the PONG manually!!

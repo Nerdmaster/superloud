@@ -12,6 +12,8 @@ def init_data
   end
 
   @random_messages = @messages.keys.shuffle
+
+  @channel_list = []
 end
 
 # Sets up data on init and each day
