@@ -1,0 +1,33 @@
+# What do we call this variant?
+:name: Ultimate RPS-7 Challenge
+
+# Messages must use symbols for the object types
+:messages:
+  :paper:
+    :air: Paper fans air
+    :rock: Paper covers rock
+    :water: Paper floats on water
+  :scissors:
+    :paper: Scissors cut paper
+    :air: Scissors swish through air
+    :sponge: Scissors cut sponge
+  :air:
+    :rock: Air erodes rock
+    :water: Air evaporates water
+    :fire: Air blows out fire
+  :rock:
+    :scissors: Rock crushes scissors
+    :sponge: Rock crushes sponge
+    :fire: Rock pounds out fire
+  :sponge:
+    :paper: Sponge soaks paper
+    :air: Sponge uses air pockets
+    :water: Sponge absorbs water
+  :water:
+    :scissors: Water rusts scissors
+    :rock: Water erodes rock
+    :fire: Water puts out fire
+  :fire:
+    :paper: Fire burns paper
+    :scissors: Fire melts scissors
+    :sponge: Fire burns sponge

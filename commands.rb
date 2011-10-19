@@ -3,16 +3,15 @@
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongme, :redongme, :upvote, :downvote, :score, :help, :rockpaperscissors, :biggestdong
+  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong
 ]
+
+# RPS stuff is complicated enough to centralize all functionality in here
+require "rps/rps_command"
 
 #####
 # Command handlers
 #####
-
-def rockpaperscissors(e, params)
-  @irc.msg(e.channel, "I AM SORRY BUT YOU CANNOT DO THIS YET OKAY")
-end
 
 def biggestdong(e, params)
   if @size_data.empty?

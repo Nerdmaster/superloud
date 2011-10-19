@@ -24,6 +24,10 @@ require 'shuffle'
 require 'commands'
 require 'loudbot'
 
+# Set up RPS game
+require "rps/rps_object"
+RPSObject.load_rps("rps/rps.yml")
+
 # User specifies network, channel and nick
 opt = Getopt::Long.getopts(
   ['--network', Getopt::REQUIRED],

@@ -14,6 +14,9 @@ def init_data
   @random_messages = @messages.keys.shuffle
 
   @channel_list = []
+
+  # RPS competitional fun
+  @rps_data ||= {}
 end
 
 # Sets up data on init and each day
