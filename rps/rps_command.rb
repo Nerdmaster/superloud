@@ -13,6 +13,7 @@ end
 def rps_pm(e, params)
   user_hash = user_hash(e.msg)
   @rps_data[user_hash] = {:nick => e.nick, :rps => RPSObject.new} unless @rps_data[user_hash]
+  rps = @rps_data[user_hash][:rps]
 
   # User needs to specify channel and object - if either are missing, send usage info
   if params.count != 2
@@ -23,18 +24,64 @@ def rps_pm(e, params)
 
   (channel, object) = params
 
+  # Channel must be valid
   unless @channel_list.include?(channel)
     @irc.msg(e.nick, "HEY DUMBFACE I AM NOT IN THAT CHANNEL I AM ONLY IN %s" % @channel_list.join(", "))
     return
   end
 
-  unless RPSObject.valid_object?(params.first.downcase)
+  # Object requested must also be valid
+  object_symbol = object.downcase.to_sym
+
+  unless RPSObject.valid_object?(object_symbol)
     @irc.msg(e.nick, "HEY DUMBFACE THAT IS AN INVALID OBJECT")
     invalid_object_output(e.nick)
     return
   end
+
+  # Just to be a real dick - if object was valid, but not loud, user fails
+  unless object.upcase == object
+    @irc.msg(e.nick, "IT SOUNDED LIKE YOU REQUESTED A #{object.upcase} BUT I CAN'T QUITE HEAR YOU")
+    return
+  end
+
+  # We got here?  This means our user isn't a complete idiot!
+  rps.type = object_symbol
+  @irc.msg(e.nick, "OKAY I WILL SET YOU UP THE BOMB ALSO THX 4 PLAYING")
+
+  # On the other hand, the user might be a complete idiot
+  if @rps_contestant && @rps_contestant == @rps_data[user_hash]
+    sleep 2
+    @irc.msg(e.nick, "GET THE FUCK OUT OF MY FACE THIS IS NOT FIGHT CLUB YOU CANNOT FIGHT YOURSELF")
+    return
+  end
+
+  rpsname = RPSObject.config[:name].upcase
+
+  unless @rps_contestant
+    @rps_contestant = @rps_data[user_hash]
+    @irc.msg(channel, "#{e.nick.upcase} HAS REGISTERED FOR #{rpsname}!  WHO IS BRAVE ENOUGH TO FIGHT???")
+    return
+  end
+
+  challenger = @rps_data[user_hash]
+  challengee = @rps_contestant
+  @irc.msg(channel, "#{challenger[:nick].upcase} HAS REGISTERED FOR #{rpsname} TO CHALLENGE #{challengee[:nick].upcase}...")
+
+  case challenger[:rps].fight!(challengee[:rps])
+    when true
+      text = "AND DEFEATS #{challengee[:nick].upcase}: %s"
+    when false
+      text = "BUT #{challenger[:nick].upcase} IS DEFEATED: %s"
+    when nil
+      text = "BUT BOTH WERE USING #{challenger[:rps].type.to_s.upcase}.  OMFG HOW GAY A TIE."
+  end
+
+  @irc.msg(channel, text % challenger[:rps].fight_message(challengee[:rps]).upcase )
+
+  @rps_contestant = nil
 end
 
 def rps_channel(e, params)
-  @irc.msg(e.channel, "I AM REALLY SO SORRY BUT THIS STILL ISN'T FUCKING READY OKAY")
+  @irc.msg(e.channel, "SO YOU WANT TO PLAY RPS RIGHT?  YOU GOTTA SHOW ME THE PM LOVE, BABY.  /msg #{@irc.me} !RPS [CHANNEL] [OBJECT]")
 end
