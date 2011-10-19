@@ -1,7 +1,16 @@
 # What do we call this variant?
 :name: Ultimate RPS-7 Challenge
 
-# Messages must use symbols for the object types
+# Messages must use symbols for the object types.  All types must have a top-level entry, but they
+# must then only define keys for object types they defeat.  In the below example, if you want to
+# determine if paper beats rock, you look at :paper, then look for :rock.  Since you see it, that
+# means paper wins.  But paper vs. fire requires two lookups: :paper's hash has no :fire key, so
+# you have to look up :fire's hash.  Since you see paper there, you know that :fire beats :paper.
+#
+# The engine does not currently try to validate this data.  If you put in settings that cause some
+# types not to have battles with other types, the engine will probably behave in unpredictable
+# ways.  Similarly, if you have two types that both have each other in their hashes, it's hard to
+# say which the engine will consider the victor.
 :messages:
   :paper:
     :air: Paper fans air
