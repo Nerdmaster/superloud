@@ -50,7 +50,7 @@ def rps_pm(e, params)
   @irc.msg(e.nick, "OKAY I WILL SET YOU UP THE BOMB ALSO THX 4 PLAYING")
 
   # On the other hand, the user might be a complete idiot
-  if @rps_contestant && @rps_contestant == @rps_data[user_hash]
+  if @rps_contestant[channel] && @rps_contestant[channel] == @rps_data[user_hash]
     sleep 2
     @irc.msg(e.nick, "GET THE FUCK OUT OF MY FACE THIS IS NOT FIGHT CLUB YOU CANNOT FIGHT YOURSELF")
     return
@@ -58,14 +58,14 @@ def rps_pm(e, params)
 
   rpsname = RPSObject.config[:name].upcase
 
-  unless @rps_contestant
-    @rps_contestant = @rps_data[user_hash]
+  unless @rps_contestant[channel]
+    @rps_contestant[channel] = @rps_data[user_hash]
     @irc.msg(channel, "#{e.nick.upcase} HAS REGISTERED FOR #{rpsname}!  WHO IS BRAVE ENOUGH TO FIGHT???")
     return
   end
 
   challenger = @rps_data[user_hash]
-  challengee = @rps_contestant
+  challengee = @rps_contestant[channel]
   @irc.msg(channel, "#{challenger[:nick].upcase} HAS REGISTERED FOR #{rpsname} TO CHALLENGE #{challengee[:nick].upcase}...")
 
   case challenger[:rps].fight!(challengee[:rps])
@@ -79,7 +79,7 @@ def rps_pm(e, params)
 
   @irc.msg(channel, text % challenger[:rps].fight_message(challengee[:rps]).upcase )
 
-  @rps_contestant = nil
+  @rps_contestant[channel] = nil
 end
 
 def rps_channel(e, params)
