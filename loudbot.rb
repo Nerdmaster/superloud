@@ -17,7 +17,7 @@ def init_data
 
   # RPS competitional fun
   @rps_data ||= {}
-  @rps_contestant = []
+  @rps_contestant = {}
 end
 
 # Sets up data on init and each day
