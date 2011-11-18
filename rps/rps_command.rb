@@ -77,7 +77,8 @@ def rps_pm(e, params)
       text = "BUT BOTH WERE USING #{challenger[:rps].type.to_s.upcase}.  OMFG HOW GAY A TIE."
   end
 
-  @irc.msg(channel, text % challenger[:rps].fight_message(challengee[:rps]).upcase )
+  # I AM DELIBERATELY NOT UPPERCASING THE FIGHT MESSAGE IT IS TOO OBNOXIOUS OMG
+  @irc.msg(channel, text % challenger[:rps].fight_message(challengee[:rps]) )
 
   @rps_contestant[channel] = nil
 end
