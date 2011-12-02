@@ -73,6 +73,9 @@ end
 # Handles a command (string begins with ! - to keep with the pattern, I'm making our loudbot only
 # respond to loud commands)
 def do_command(e, command, params)
+  # Empty command means no command
+  return if command.empty?
+
   # Convert to a method symbol
   command = command.downcase.to_sym
 
