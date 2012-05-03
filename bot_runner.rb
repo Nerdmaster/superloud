@@ -33,14 +33,16 @@ opt = Getopt::Long.getopts(
   ['--network', Getopt::REQUIRED],
   ['--channel', Getopt::REQUIRED],
   ['--nick', Getopt::REQUIRED],
+  ['--port', Getopt::REQUIRED],
   ['--debug', Getopt::BOOLEAN]
 )
 
 # Create bot object
 @irc = Net::YAIL.new(
   :address    => opt['network'],
-  :username   => 'Frakking Bot',
+  :username   => '2LOUD4U',
   :realname   => 'John Botfrakker',
+  :port       => opt["port"],
   :nicknames  => [opt['nick'] || "SUPERLOUD"]
 )
 
