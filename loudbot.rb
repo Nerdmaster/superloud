@@ -34,7 +34,6 @@ def it_was_loud(message, channel)
   @irc.log.debug "IT WAS LOUD!  #{message.inspect}"
 
   @messages[message] ||= 1
-  random_message(channel)
 end
 
 # This is our main message handler.
@@ -44,6 +43,9 @@ end
 # * It has at least one space
 # * It has no lowercase letters
 # * At least 60% of the characters are uppercase letters
+# * Words aren't "invalid":
+#   * Average letters per word is 3 or more
+#   * A .uniq call should not cut more than 1/2 the words
 def incoming_message(e)
   # We don't respond to "private" messages
   return if e.pm?
@@ -54,12 +56,53 @@ def incoming_message(e)
 
   # Count various exciting things
   len = text.length
-  uppercase_count = text.scan(/[A-Z]/).length
-  space_count = text.scan(/\s/).length
+  words = text.split(/[^A-Z']+/)
+  letters = text.scan(/[A-Z]/)
+  uppercase_count = letters.length
 
-  if len >= 11 && uppercase_count >= (len * 0.60) && space_count >= 1 && text !~ /retard/i
-    it_was_loud(e.message, e.channel)
+  # Rules are getting complex - let's handle them one at a time
+  return if len < 11
+  return if uppercase_count < len * 0.60
+  return if text =~ /retard/
+
+  # At this point it's close enough, so let's at least spit out a response
+  random_message(e.channel)
+
+  # Throw out any words that are obvious nonsense
+  nonsense = []
+  for word in words.dup
+    # I and A are valid words
+    next if word.length == 1
+
+    # No vowels?  NO WORD!
+    nonsense.push(words.delete(word)) if word =~ /^[^AEIOUY]+$/
+
+    # Vowels only?  NO WORD!!
+    nonsense.push(words.delete(word)) if word =~ /^[AEIOU]+$/
   end
+
+  @irc.log.debug "Rejected #{nonsense.inspect} as nonsense words" unless nonsense.empty?
+
+  # Always exit if we only ended up with one unique word
+  if words.uniq.count == 1
+    @irc.log.debug "Rejected #{words.inspect} - only one unique word"
+    return
+  end
+
+  # Half the words aren't unique?  GTFO!
+  if words.uniq.count <= words.count / 2
+    @irc.log.debug "Rejected #{words.inspect} - too few unique words"
+    return
+  end
+
+  # What about letters per word?!?
+  if letters.count / words.count < 3.0
+    @irc.log.debug "Rejected #{text.inspect} - words are too small"
+    return
+  end
+
+  # WE MADE IT OMG
+  it_was_loud(e.message, e.channel)
 end
 
 # Pulls a random message from our messages array and sends it to the given channel.  Reshuffles
