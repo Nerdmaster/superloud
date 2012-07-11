@@ -119,8 +119,8 @@ def vote(value)
 
   @messages[@last_message] += value
   if @messages[@last_message] <= -1
-    @last_message = nil
     @messages.delete(@last_message)
+    @last_message = nil
   end
   @dirty_messages = true
 end
