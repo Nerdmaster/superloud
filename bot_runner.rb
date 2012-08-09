@@ -121,6 +121,22 @@ end
   end
 end
 
+# Our first before-filter is declared last!  This is a bit confusing.  Maybe I'll change it.  Why
+# did I do this???  Anyway, this filter ignores messages from anybody whose nick + host match any
+# regex in ignores.txt.  Anything caught here is skipped prior to the above filters running.
+#
+# This simply checks nick + host against our ignores regexes, and calls +handled!+ to end the filter
+# and callback chain on a match.  In other words, undesireable users' messages don't get handled by
+# any of the below filters or handlers.
+@irc.hearing_msg do |e|
+  for regex in @ignore_regexes
+    if e.msg.prefix =~ regex
+      e.handled!
+      break
+    end
+  end
+end
+
 # This is our primary message callback.  We know our filters have caught people talking to us and
 # any command-style messages, so we don't need to worry about those situations here.  The decision
 # to make this the primary callback is pretty arbitrary - do what makes the most sense to you.

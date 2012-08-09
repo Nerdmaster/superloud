@@ -18,6 +18,13 @@ def init_data
   # RPS competitional fun
   @rps_data ||= {}
   @rps_contestant = {}
+
+  # Ignore list
+  @ignore_regexes = []
+  ignores = FileTest.exist?("ignores.txt") ? IO.readlines("ignores.txt") : []
+  for ignore in ignores
+    @ignore_regexes.push Regexp.new(ignore.strip, Regexp::IGNORECASE)
+  end
 end
 
 # Sets up data on init and each day
