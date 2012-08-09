@@ -98,7 +98,10 @@ end
 
 # This is a before-filter - using the present tense means it's a before-filter, and using a tense
 # of "hear" means it's for incoming messages (as opposed to "saying" and "said", where we'd filter
-# our outgoing messages).  Here we intercept all potential commands and send them to a method.
+# our outgoing messages).
+#
+# Intercept all potential commands (strings starting with a "bang", or exclamation mark)
+# and send them to a method for command-handling.
 @irc.hearing_msg do |e|
   (command, *params) = e.message.split(/\s+/)
   next unless command =~ /^!/
