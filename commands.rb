@@ -3,7 +3,7 @@
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong
+  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :sizeme
 ]
 
 # RPS stuff is complicated enough to centralize all functionality in here
@@ -27,7 +27,7 @@ def biggestdong(e, params)
   nick = big_winner[:nick]
   cm = big_winner[:size]
   inches = cm / 2.54
-  @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH WAS %0.1f INCHES (%d CM)" % [inches, cm])
+  @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH IS %0.1f INCHES (%d CM)" % [inches, cm])
 end
 
 def dongme(e, params)
@@ -69,6 +69,30 @@ def help(e, params)
   commands = VALID_COMMANDS.collect {|cmd| "!" + cmd.to_s.upcase}.join(" ")
   @irc.msg(e.channel || e.nick, "I HAVE COMMANDS AND THEY ARE: #{commands}")
 end
+
+# Reports user's current dong size
+def sizeme(e, params)
+  cm = 0;
+  inches = 0;
+  size_found = false;
+  
+  @size_data.each_key { |key|
+    if (@size_data[key][:nick] == e.nick)
+     cm = @size_data[key][:size]
+     inches = cm/2.54
+     size_found = true
+    end
+  } 
+  
+  if (size_found)
+    $msg = "HEY %s YOUR DONG IS %0.1f INCHES (%d CM)" % [e.nick.upcase, inches, cm]
+  else
+    $msg = "ONOES %s YOU HAVE NO DONG WTF" % [e.nick.upcase]
+  end
+  
+  @irc.msg(e.channel || e.nick, $msg)
+end
+
 
 #####
 # Command helpers
