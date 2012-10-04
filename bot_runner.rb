@@ -21,11 +21,11 @@ require 'getopt/long'
 require 'shuffle'
 
 # Pulls in all of loudbot's methods - filter/callback handlers for IRC events
-require 'commands'
-require 'loudbot'
+require './commands'
+require './loudbot'
 
 # Set up RPS game
-require "rps/rps_object"
+require "./rps/rps_object"
 RPSObject.load_rps("rps/rps.yml")
 
 # User specifies network, channel and nick
