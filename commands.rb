@@ -20,7 +20,7 @@ def biggestdong(e, params)
   end
 
   big_winner = Hash.new(0)
-  tielist = Array.new;
+  tielist = Array.new
   for user_hash, data in @size_data
     if big_winner[:size] < data[:size]
       big_winner = data
@@ -84,9 +84,9 @@ end
 
 # Reports user's current dong size
 def sizeme(e, params)
-  cm = 0;
-  inches = 0;
-  size_found = false;
+  cm = 0
+  inches = 0
+  size_found = false
 
   @size_data.each_key { |key|
     if (@size_data[key][:nick] == e.nick)
