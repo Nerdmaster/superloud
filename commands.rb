@@ -22,11 +22,11 @@ def biggestdong(e, params)
   big_winner = Hash.new(0)
   tielist = Array.new;
   for user_hash, data in @size_data
-    if big_winner[:size] < data[:size] 
-      big_winner = data 
+    if big_winner[:size] < data[:size]
+      big_winner = data
       tielist = [data[:nick]]
     elsif (big_winner[:size] == data[:size])
-      tielist.push(data[:nick]) 
+      tielist.push(data[:nick])
     end
   end
 
@@ -34,12 +34,12 @@ def biggestdong(e, params)
   cm = big_winner[:size]
   inches = cm / 2.54
 
-  tie_text = (tielist.length <=1 ? tielist[0] : tielist[0..-2].join(", ") + " AND " + tielist[-1])   
-  if (tielist.length <=1) 
+  tie_text = (tielist.length <=1 ? tielist[0] : tielist[0..-2].join(", ") + " AND " + tielist[-1])
+  if (tielist.length <=1)
     @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH IS %0.1f INCHES (%d CM)" % [inches, cm])
-  else 
+  else
     @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{tie_text.upcase}!  THEY'RE ALL %0.1f INCHES (%d CM)!!!1!!" % [inches, cm])
-  end  
+  end
 end
 
 def dongme(e, params)
@@ -94,14 +94,14 @@ def sizeme(e, params)
      inches = cm/2.54
      size_found = true
     end
-  } 
-  
+  }
+
   if (size_found)
     $msg = "HEY %s YOUR DONG IS %0.1f INCHES (%d CM)" % [e.nick.upcase, inches, cm]
   else
     $msg = "ONOES %s YOU HAVE NO DONG WTF" % [e.nick.upcase]
   end
-  
+
   @irc.msg(e.channel || e.nick, $msg)
 end
 
