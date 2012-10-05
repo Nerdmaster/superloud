@@ -34,7 +34,12 @@ def biggestdong(e, params)
   cm = big_winner[:size]
   inches = cm / 2.54
 
-  tie_text = (tielist.length <=1 ? tielist[0] : tielist[0..-2].join(", ") + " AND " + tielist[-1])
+  tielist.sort!
+  tie_text = case tielist.length
+    when 2 then tielist.join(" AND ")
+    else        tielist[0..-2].join(", ") + ", AND #{tielist.last}"
+  end
+
   if (tielist.length <=1)
     @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH IS %0.1f INCHES (%d CM)" % [inches, cm])
   else
