@@ -35,6 +35,27 @@ describe "commands" do
       biggestdong(@event, {})
     end
 
+    it "should use 'BOTH' to describe dongs in a two-way tie" do
+      @size_data = {
+        :one => {:size => 5, :nick => "loser"},
+        :two => {:size => 6, :nick => "Nerdmaster"},
+        :three => {:size => 6, :nick => "DialBOT"}
+      }
+      @irc.should_receive(:msg).with("#ngs", /THEY'RE BOTH/)
+      biggestdong(@event, {})
+    end
+
+    it "should use 'ALL' to describe dongs in a three-way tie" do
+      @size_data = {
+        :one => {:size => 5, :nick => "loser"},
+        :two => {:size => 6, :nick => "Nerdmaster"},
+        :three => {:size => 6, :nick => "DialBOT"},
+        :four => {:size => 6, :nick => "Hal"}
+      }
+      @irc.should_receive(:msg).with("#ngs", /THEY'RE ALL/)
+      biggestdong(@event, {})
+    end
+
     it "should return 'X, Y, and Z' in the case of a three-way tie"do
       @size_data = {
         :one => {:size => 5, :nick => "loser"},
