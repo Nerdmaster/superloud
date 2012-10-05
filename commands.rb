@@ -43,7 +43,7 @@ def biggestdong(e, params)
   if (tielist.length <=1)
     @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH IS %0.1f INCHES (%d CM)" % [inches, cm])
   else
-    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{tie_text.upcase}!  THEY'RE ALL %0.1f INCHES (%d CM)!!!1!!" % [inches, cm])
+    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{tie_text.upcase}!  THEY'RE %s %0.1f INCHES (%d CM)!!!1!!" % [(tielist.length == 2 ? "BOTH" : "ALL"), inches, cm])
   end
 end
 
