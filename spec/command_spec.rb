@@ -10,21 +10,40 @@ describe "commands" do
     @size_data = {}
   end
 
-  describe "#sizeme" do
+  describe "#size" do
     before(:each) do
+      @size_data = {:one => {:size => 40, :nick => "Nerdmaster"}}
+      @event.nick = "JealousGuy"
+    end
+
+    it "should call help if there is no user specified" do
+      should_receive(:help).with(@event, ["SIZE"])
+      size(@event, [])
+    end
+
+    it "should address the user if they are requesting their own size" do
       @event.nick = "Nerdmaster"
+      @irc.should_receive(:msg).with("#ngs", /^HEY NERDMASTER/)
+      size(@event, ["NERDMASTER"])
     end
 
     it "should return size in CM and inches" do
-      @size_data = {:one => {:size => 12, :nick => "Nerdmaster"}}
-      @irc.should_receive(:msg).with("#ngs", /12 CM/)
-      sizeme(@event, [])
+      @irc.should_receive(:msg).with("#ngs", /40 CM/)
+      size(@event, ["NERDMASTER"])
     end
 
     it "should return no data if name isn't found" do
-      @size_data = {:one => {:size => 12, :nick => "Nerdplaster"}}
-      @irc.should_not_receive(:msg).with("#ngs", /12 CM/)
-      @irc.should_receive(:msg).with("#ngs", /NERDMASTER.*NO DONG/)
+      @size_data = {}
+      @irc.should_not_receive(:msg).with("#ngs", /\d+ CM/)
+      @irc.should_receive(:msg).with("#ngs", /NO DONG.*NERDMASTER/)
+      size(@event, ["NERDMASTER"])
+    end
+  end
+
+  describe "#sizeme" do
+    it "should call the size command with the event's nickname as a parameter" do
+      @event.nick = "Nerdmaster"
+      should_receive(:size).with(@event, [@event.nick])
       sizeme(@event, [])
     end
   end

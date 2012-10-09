@@ -3,7 +3,7 @@
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :sizeme
+  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme
 ]
 
 # RPS stuff is complicated enough to centralize all functionality in here
@@ -106,6 +106,7 @@ def help(e, params)
   end
 
   case params.first
+    when "SIZE" then      send.call "!SIZE [USERNAME]: GIVES YOU THE ONLY THING THAT MATTERS ABOUT SOMEBODY: SIZE"
     when "SIZEME" then    send.call "!SIZEME: TELLS YOU IF YOU ARE WORTH ANYTHING TO SOCIETY"
     when "HELP" then      send.call "OH WOW YOU ARE SO META I AM SO IMPRESSED WE SHOULD GO HAVE SEX NOW"
     when "DONGME" then    send.call "!DONGME: SHOWS HOW MUCH OF A MAN YOU ARE"
@@ -114,29 +115,36 @@ def help(e, params)
   end
 end
 
-# Reports user's current dong size
-def sizeme(e, params)
-  cm = 0
-  inches = 0
-  size_found = false
-
-  @size_data.each_key { |key|
-    if (@size_data[key][:nick] == e.nick)
-     cm = @size_data[key][:size]
-     inches = cm/2.54
-     size_found = true
-    end
-  }
-
-  if (size_found)
-    $msg = "HEY %s YOUR DONG IS %0.1f INCHES (%d CM)" % [e.nick.upcase, inches, cm]
-  else
-    $msg = "ONOES %s YOU HAVE NO DONG WTF" % [e.nick.upcase]
+# Reports anybody's current dong size
+def size(e, params)
+  if (params.empty?)
+    help(e, ["SIZE"])
+    return
   end
 
-  @irc.msg(e.channel || e.nick, $msg)
+  name = params.first.upcase
+  msg = nil
+
+  for key, data in @size_data
+    datanick = data[:nick].upcase
+    if datanick == name
+     cm = data[:size]
+     inches = cm / 2.54
+     fmt = name == e.nick.upcase ? "HEY %s YOUR DONG IS" : "%s'S DONG IS"
+     msg = "#{fmt} %0.1f INCHES (%d CM)" % [name, inches, cm]
+     break
+    end
+  end
+
+  msg ||= "ONOES THERE IS NO DONG FOR #{name}"
+
+  @irc.msg(e.channel || e.nick, msg.upcase)
 end
 
+# Reports users's current dong size
+def sizeme(e, params)
+  size(e, [e.nick])
+end
 
 #####
 # Command helpers
