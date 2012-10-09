@@ -4,13 +4,13 @@ require "ostruct"
 require File.dirname(__FILE__) + '/../commands'
 
 describe "commands" do
-  describe "biggestdong" do
-    before(:each) do
-      @irc = double("Net::YAIL")
-      @event = OpenStruct.new(:channel => "#ngs")
-      @size_data = {}
-    end
+  before(:each) do
+    @irc = double("Net::YAIL")
+    @event = OpenStruct.new(:channel => "#ngs")
+    @size_data = {}
+  end
 
+  describe "#biggestdong" do
     it "should not name anybody when @size_data is empty" do
       @irc.should_receive(:msg).with("#ngs", /NO DONGS TODAY/)
       biggestdong(@event, [])
