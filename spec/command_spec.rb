@@ -56,7 +56,7 @@ describe "commands" do
       biggestdong(@event, {})
     end
 
-    it "should return 'X, Y, and Z' in the case of a three-way tie"do
+    it "should return 'X, Y, and Z' in the case of a three-way tie" do
       @size_data = {
         :one => {:size => 5, :nick => "loser"},
         :two => {:size => 6, :nick => "Nerdmaster"},
@@ -81,7 +81,7 @@ describe "commands" do
       biggestdong(@event, [])
     end
 
-    it "should return 'W, X, Y, and Z' in the case of a three-way tie"do
+    it "should return 'W, X, Y, and Z' in the case of a four-way tie" do
       @size_data = {
         :one => {:size => 5, :nick => "loser"},
         :two => {:size => 6, :nick => "Nerdmaster"},
