@@ -84,7 +84,34 @@ end
 
 def help(e, params)
   commands = VALID_COMMANDS.collect {|cmd| "!" + cmd.to_s.upcase}.join(" ")
-  @irc.msg(e.channel || e.nick, "I HAVE COMMANDS AND THEY ARE: #{commands}")
+  target = e.channel || e.nick
+  send = lambda{|msg| @irc.msg(target, msg)}
+
+  # Show generic help if no specific command is given
+  if params.empty?
+    send.call "I HAVE COMMANDS AND THEY ARE: #{commands}"
+    return
+  end
+
+  # Two or more params == bad news
+  if params.length > 1
+    send.call "WTF ARE YOU DUMB?  I OFFER HELP FOR ONE COMMAND AT A TIME JERKFACE"
+    return
+  end
+
+  # Only allow valid commands' sub-help
+  unless VALID_COMMANDS.include(params.first.downcase.to_sym)
+    send.call "!#{params.first} IS NOT A COMMAND YOU TWIT"
+    return
+  end
+
+  case params.first
+    when "SIZEME" then    send.call "!SIZEME: TELLS YOU IF YOU ARE WORTH ANYTHING TO SOCIETY"
+    when "HELP" then      send.call "OH WOW YOU ARE SO META I AM SO IMPRESSED WE SHOULD GO HAVE SEX NOW"
+    when "DONGME" then    send.call "!DONGME: SHOWS HOW MUCH OF A MAN YOU ARE"
+    when "REDONGME" then  send.call "!REDONGME: LETS YOU TRY TO MAKE YOURSELF INTO MORE OF A MAN BUT WITH DANGER RISK!"
+    else                  send.call "!#{params.first}: DOES SOMETHING AWESOME"
+  end
 end
 
 # Reports user's current dong size
