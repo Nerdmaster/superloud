@@ -13,7 +13,7 @@ describe "commands" do
 
     it "should not name anybody when @size_data is empty" do
       @irc.should_receive(:msg).with("#ngs", /NO DONGS TODAY/)
-      biggestdong(@event, {})
+      biggestdong(@event, [])
     end
 
     it "should return the winner when there are no ties" do
@@ -22,7 +22,7 @@ describe "commands" do
         :two => {:size => 6, :nick => "Nerdmaster"}
       }
       @irc.should_receive(:msg).with("#ngs", /NERDMASTER'S/)
-      biggestdong(@event, {})
+      biggestdong(@event, [])
     end
 
     it "should return 'X and Y' in the case of a two-way tie" do
@@ -32,7 +32,7 @@ describe "commands" do
         :three => {:size => 6, :nick => "DialBOT"}
       }
       @irc.should_receive(:msg).with("#ngs", /TIE BETWEEN DIALBOT AND NERDMASTER/)
-      biggestdong(@event, {})
+      biggestdong(@event, [])
     end
 
     it "should use 'BOTH' to describe dongs in a two-way tie" do
@@ -64,7 +64,7 @@ describe "commands" do
         :four => {:size => 6, :nick => "Hal"}
       }
       @irc.should_receive(:msg).with("#ngs", /TIE BETWEEN DIALBOT, HAL, AND NERDMASTER/)
-      biggestdong(@event, {})
+      biggestdong(@event, [])
     end
 
     it "shouldn't confuse non-winning ties" do
@@ -78,7 +78,7 @@ describe "commands" do
         :five => {:size => 7, :nick => "somedude"}
       }
       @irc.should_receive(:msg).with("#ngs", /SOMEDUDE'S/)
-      biggestdong(@event, {})
+      biggestdong(@event, [])
     end
 
     it "should return 'W, X, Y, and Z' in the case of a three-way tie"do
@@ -90,7 +90,7 @@ describe "commands" do
         :five => {:size => 6, :nick => "pizza"}
       }
       @irc.should_receive(:msg).with("#ngs", /DIALBOT, HAL, NERDMASTER, AND PIZZA/)
-      biggestdong(@event, {})
+      biggestdong(@event, [])
     end
   end
 end
