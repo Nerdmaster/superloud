@@ -10,6 +10,25 @@ describe "commands" do
     @size_data = {}
   end
 
+  describe "#sizeme" do
+    before(:each) do
+      @event.nick = "Nerdmaster"
+    end
+
+    it "should return size in CM and inches" do
+      @size_data = {:one => {:size => 12, :nick => "Nerdmaster"}}
+      @irc.should_receive(:msg).with("#ngs", /12 CM/)
+      sizeme(@event, [])
+    end
+
+    it "should return no data if name isn't found" do
+      @size_data = {:one => {:size => 12, :nick => "Nerdplaster"}}
+      @irc.should_not_receive(:msg).with("#ngs", /12 CM/)
+      @irc.should_receive(:msg).with("#ngs", /NERDMASTER.*NO DONG/)
+      sizeme(@event, [])
+    end
+  end
+
   describe "#biggestdong" do
     it "should not name anybody when @size_data is empty" do
       @irc.should_receive(:msg).with("#ngs", /NO DONGS TODAY/)
