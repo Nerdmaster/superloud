@@ -10,6 +10,35 @@ describe "commands" do
     @size_data = {}
   end
 
+  describe "#help" do
+    it "should return generic help with no command-specific request" do
+      @irc.should_receive(:msg).with("#ngs", /^I HAVE COMMANDS AND THEY ARE/)
+      help(@event, [])
+    end
+
+    it "should return an error message if too many parameters are sent in" do
+      @irc.should_receive(:msg).with("#ngs", /ONE COMMAND AT A TIME/)
+      help(@event, ["HELP", "RPS"])
+    end
+
+    it "should return an error message if command-specific help is requested and no command exists" do
+      @irc.should_receive(:msg).with("#ngs", /^!RP IS NOT A COMMAND/)
+      help(@event, ["RP"])
+    end
+
+    it "should spit out command-specific help when valid" do
+      @irc.should_receive(:msg).with("#ngs", /^!SIZEME: /)
+      help(@event, ["SIZEME"])
+    end
+
+    it "should be an ass when requesting help help" do
+      @irc.should_receive(:msg).with("#ngs", /^OH WOW YOU ARE SO META/)
+      help(@event, ["HELP"])
+    end
+
+    it "should really be pulling all the help and command info from a config file and plugins or something"
+  end
+
   describe "#size" do
     before(:each) do
       @size_data = {:one => {:size => 40, :nick => "Nerdmaster"}}

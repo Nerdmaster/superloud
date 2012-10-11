@@ -100,7 +100,7 @@ def help(e, params)
   end
 
   # Only allow valid commands' sub-help
-  unless VALID_COMMANDS.include(params.first.downcase.to_sym)
+  unless VALID_COMMANDS.include?(params.first.downcase.to_sym)
     send.call "!#{params.first} IS NOT A COMMAND YOU TWIT"
     return
   end
