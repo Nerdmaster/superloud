@@ -71,6 +71,7 @@ def incoming_message(e)
   return if len < 11
   return if uppercase_count < len * 0.60
   return if text =~ /retard/
+  return if text =~ /reetard/
 
   # At this point it's close enough, so let's at least spit out a response
   random_message(e.channel)
