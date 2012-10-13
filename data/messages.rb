@@ -23,6 +23,17 @@ class Messages
 
     @random_messages = @messages.keys.shuffle
   end
+
+  # Stores the given string if it isn't already stored, setting the score to 1
+  def add(string)
+    @messages[string] ||= 1
+  end
+
+  # Pulls a random message, reloading the data if necessary
+  def random
+    @random_messages = @messages.keys.shuffle if @random_messages.empty?
+    @last_message = @random_messages.pop
+  end
 end
 
 end

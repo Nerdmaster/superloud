@@ -32,8 +32,7 @@ end
 # Stores a LOUD message into the hash and responds.
 def it_was_loud(message, channel)
   @irc.log.debug "IT WAS LOUD!  #{message.inspect}"
-
-  @messages[message] ||= 1
+  @messages.add(message)
 end
 
 # This is our main message handler.
@@ -106,12 +105,9 @@ def incoming_message(e)
   it_was_loud(e.message, e.channel)
 end
 
-# Pulls a random message from our messages array and sends it to the given channel.  Reshuffles
-# the main array if the randomized array is empty.
+# Pulls a random message from our messages array and sends it to the given channel
 def random_message(channel)
-  @random_messages = @messages.keys.shuffle if @random_messages.empty?
-  @last_message = @random_messages.pop
-  @irc.msg(channel, @last_message)
+  @irc.msg(channel, @messages.random)
 end
 
 # Handles a command (string begins with ! - to keep with the pattern, I'm making our loudbot only
