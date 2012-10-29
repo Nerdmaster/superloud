@@ -57,4 +57,46 @@ describe "loudbot.rb" do
       random_message("foo")
     end
   end
+
+  describe "#incoming_message" do
+    before(:each) do
+      @logger = double("logger")
+      @logger.stub(:debug)
+      @irc.stub(:log => @logger)
+      @messages = Louds::Data::Messages.new
+      self.stub(:random_message)
+
+      @invalid_case         = "IT'S ONLY VALID IF ALL WORDS ARE UPPERCASE COMPLETELy"
+      @invalid_length       = "LOUD SHORT"
+      @invalid_no_vowels    = "TBBSSSDDDFFF FDDSSDJJKLLM FRTGBNMV"
+      @invalid_vowels_only  = "AEIOUOUAEU AUIOEEIUO AUIOUA"
+      @invalid_dupes        = "BINARY BINARY BINARY BINARY BOO"
+      @invalid_words_length = "IS IT VALID NO"
+      @invalid_letter_ratio = "THIS                                         ISN'T                                   VALID"
+      @valid                = "THIS ISN'T FUNNY, BUT AT LEAST IT'S VALID!"
+    end
+
+    it "should ignore invalid stuff" do
+      # YES THIS SHOULD DO BETTER TESTING DEAL WITH IT
+      # TODO: Break up validations into methods so testing is actually sensible
+      @messages.should_not_receive(:add)
+      for text in [@invalid_case, @invalid_length, @invalid_no_vowels, @invalid_vowels_only, @invalid_dupes, @invalid_words_length, @invalid_letter_ratio]
+        @event.message = text
+        incoming_message(@event)
+      end
+    end
+
+    it "should add valid phrase to message stash" do
+      @messages.should_receive(:add).with(@valid)
+      @event.message = @valid
+      incoming_message(@event)
+    end
+
+    it "should ignore pms even if text is valid" do
+      @messages.should_not_receive(:add)
+      @event.stub(:pm? => true)
+      @event.message = @valid
+      incoming_message(@event)
+    end
+  end
 end
