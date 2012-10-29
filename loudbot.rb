@@ -29,12 +29,6 @@ def init_daily_data
   @last_ping_day = Date.today
 end
 
-# Stores a LOUD message into the hash and responds.
-def it_was_loud(message, channel)
-  @irc.log.debug "IT WAS LOUD!  #{message.inspect}"
-  @messages.add(message)
-end
-
 # This is our main message handler.
 #
 # We store and respond if messages meet the following criteria:
@@ -102,7 +96,8 @@ def incoming_message(e)
   end
 
   # WE MADE IT OMG
-  it_was_loud(e.message, e.channel)
+  @irc.log.debug "IT WAS LOUD!  #{text.inspect}"
+  @messages.add(text)
 end
 
 # Pulls a random message from our messages array and sends it to the given channel
