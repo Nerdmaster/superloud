@@ -49,7 +49,6 @@ describe "loudbot.rb" do
       @msg.stub(:keys => [1, 2])
       @msg.keys.should_receive(:shuffle).once.and_return(["new stuff", "more new stuff"])
       random_message("foo")
-      #@rnd.should eq(["new stuff", "more new stuff"])
     end
 
     it "should send the message to the channel" do
