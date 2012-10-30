@@ -4,10 +4,13 @@ module Louds
 module Data
 
 class Messages
+  attr_reader :last
+
   def initialize
     @dirty = false
     @messages = {}
     @random_messages = []
+    @last = nil
   end
 
   # Populates the message structure so that random items can be produced
@@ -35,7 +38,7 @@ class Messages
   # Pulls a random message, reloading the data if necessary
   def random
     @random_messages = @messages.keys.shuffle if @random_messages.empty?
-    @last_message = @random_messages.pop
+    @last = @random_messages.pop
   end
 
   def dirty?
@@ -48,6 +51,24 @@ class Messages
 
     File.open("louds.yml", "w") {|f| f.puts @messages.to_yaml}
     @dirty = false
+  end
+
+  # Adds +value+ to the score of the last message, if there was one.  If the score goes too low, we
+  # remove that message forever.
+  def vote(value)
+    return unless @last
+
+    @messages[@last] += value
+    if @messages[@last] <= -1
+      @messages.delete(@last)
+      @last = nil
+    end
+    @dirty = true
+  end
+
+  # Returns the score of the last message
+  def last_score
+    return @messages[@last]
   end
 end
 

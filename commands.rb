@@ -65,21 +65,21 @@ end
 
 # Votes the current message +1
 def upvote(e, params)
-  vote(1)
+  @messages.vote(1)
 end
 
 def downvote(e, params)
-  vote(-1)
+  @messages.vote(-1)
 end
 
 # Reports the last message's score
 def score(e, params)
-  if !@last_message
+  if !@messages.last
     @irc.msg(e.channel || e.nick, "NO LAST MESSAGE OR IT WAS DELETED BY !DOWNVOTE")
     return
   end
 
-  @irc.msg(e.channel || e.nick, "#{@last_message}: #{@messages[@last_message]}")
+  @irc.msg(e.channel || e.nick, "#{@messages.last}: #{@messages.last_score}")
 end
 
 def help(e, params)
@@ -186,17 +186,4 @@ end
 def send_dong(e)
   size = compute_size(e)
   @irc.msg(e.channel || e.nick, "8%sD" % ['=' * size])
-end
-
-# Adds +value+ to the score of the last message, if there was one.  If the score goes too low, we
-# remove that message forever.
-def vote(value)
-  return unless @last_message
-
-  @messages[@last_message] += value
-  if @messages[@last_message] <= -1
-    @messages.delete(@last_message)
-    @last_message = nil
-  end
-  @dirty_messages = true
 end
