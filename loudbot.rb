@@ -24,7 +24,6 @@ end
 def init_daily_data
   @size_data = {}
   @last_message = nil
-  @dirty_messages = false
   @redongs = Hash.new(0)
   @last_ping_day = Date.today
 end
