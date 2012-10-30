@@ -44,6 +44,8 @@ class Messages
 
   # Stores messages into a YAML file
   def serialize
+    return unless dirty?
+
     File.open("louds.yml", "w") {|f| f.puts @messages.to_yaml}
     @dirty = false
   end

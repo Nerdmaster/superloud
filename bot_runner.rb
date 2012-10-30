@@ -84,10 +84,7 @@ end
 # Here we're using the ping filter to actually do the serialization of our messages hash.  Since
 # we know pings are regular, this is kind of a hack to serialize every few minutes.
 @irc.heard_ping do
-  if @messages.dirty?
-    @irc.log.debug "ATTEMPTING TO SERIALIZE MESSAGES"
-    @messages.serialize
-  end
+  @messages.serialize
 
   # Reset any daily stuffs
   if @last_ping_day != Date.today
