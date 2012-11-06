@@ -100,7 +100,9 @@ end
 
 # Pulls a random message from our messages array and sends it to the given channel
 def random_message(channel)
-  @irc.msg(channel, @messages.random)
+  message = @messages.random
+  @irc.msg(channel, message.text)
+  message.view!
 end
 
 # Handles a command (string begins with ! - to keep with the pattern, I'm making our loudbot only

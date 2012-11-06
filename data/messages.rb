@@ -68,9 +68,8 @@ class Messages
   def random
     @random_messages = @messages.keys.shuffle if @random_messages.empty?
     @last = @messages[@random_messages.pop]
-    @last.view!
 
-    return @last.text
+    return @last
   end
 
   def dirty?
