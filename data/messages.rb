@@ -1,10 +1,44 @@
 # This file holds all methods related to accessing the louds message data
 
+require "singleton"
+
 module Louds
 module Data
 
+class Message
+  attr_reader :author, :views, :score, :text
+
+  def initialize(text, author)
+    @@messages ||= Louds::Data::Messages.instance
+
+    @text = text
+    @author = author
+    @views = 0
+    @score = 1
+  end
+
+  def view!
+    @views += 1
+    @@messages.dirty!
+  end
+
+  def upvote!
+    @score += 1
+    @@messages.dirty!
+  end
+
+  def downvote!
+    @score -= 1
+    @@messages.dirty!
+  end
+end
+
 class Messages
+  include Singleton
+
   attr_reader :last
+
+  @@file = "loud_messages.yml"
 
   def initialize
     @dirty = false
@@ -15,60 +49,44 @@ class Messages
 
   # Populates the message structure so that random items can be produced
   def load
-    # Loud messages can be newline-separated strings in louds.txt or an array or hash serialized in
-    # louds.yml.  If messages are an array, we convert all of them to hash keys with a score of 1.
-    @messages = FileTest.exist?("louds.yml") ? YAML.load_file("louds.yml") :
-                FileTest.exist?("louds.txt") ? IO.readlines("louds.txt") :
-                {"ROCK ON WITH SUPERLOUD" => 1}
-    if Array === @messages
-      dupes = @messages.dup
-      dupes.each {|string| @messages[string.strip] = 1}
-    end
-
+    # Louds messages are now a complex data structure that contains text, author, score, and
+    # times viewed.  There is no conversion, sorry.  The messages are still stored in a hash with
+    # the text as the index as this allows easier lookups (until we go fully db).
+    @messages = FileTest.exist?(@@file) ? YAML.load_file(@@file) :
+                {"ROCK ON WITH SUPERLOUD" => Message.new("ROCK ON WITH SUPERLOUD", "SUPERLOUD")}
     @random_messages = @messages.keys.shuffle
     @dirty = false
   end
 
   # Stores the given string if it isn't already stored, setting the score to 1
-  def add(string)
-    @messages[string] ||= 1
-    @dirty = true
+  def add(string, author)
+    @messages[string] ||= Message.new(string, author)
+    dirty!
   end
 
   # Pulls a random message, reloading the data if necessary
   def random
     @random_messages = @messages.keys.shuffle if @random_messages.empty?
-    @last = @random_messages.pop
+    @last = @messages[@random_messages.pop]
+    @last.view!
+
+    return @last.text
   end
 
   def dirty?
     return @dirty
   end
 
+  def dirty!
+    @dirty = true
+  end
+
   # Stores messages into a YAML file
   def serialize
     return unless dirty?
 
-    File.open("louds.yml", "w") {|f| f.puts @messages.to_yaml}
+    File.open(@@file, "w") {|f| f.puts @messages.to_yaml}
     @dirty = false
-  end
-
-  # Adds +value+ to the score of the last message, if there was one.  If the score goes too low, we
-  # remove that message forever.
-  def vote(value)
-    return unless @last
-
-    @messages[@last] += value
-    if @messages[@last] <= -1
-      @messages.delete(@last)
-      @last = nil
-    end
-    @dirty = true
-  end
-
-  # Returns the score of the last message
-  def last_score
-    return @messages[@last]
   end
 end
 

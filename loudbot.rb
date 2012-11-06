@@ -3,7 +3,7 @@ require "./data/messages"
 # Sets up one-time data when loudbot starts
 def init_data
   # Initialize message data object
-  @messages = Louds::Data::Messages.new
+  @messages = Louds::Data::Messages.instance
   @messages.load
 
   @channel_list = []
@@ -95,7 +95,7 @@ def incoming_message(e)
 
   # WE MADE IT OMG
   @irc.log.debug "IT WAS LOUD!  #{text.inspect}"
-  @messages.add(text)
+  @messages.add(text, e.nick)
 end
 
 # Pulls a random message from our messages array and sends it to the given channel

@@ -65,11 +65,11 @@ end
 
 # Votes the current message +1
 def upvote(e, params)
-  @messages.vote(1)
+  @messages.last.upvote!
 end
 
 def downvote(e, params)
-  @messages.vote(-1)
+  @messages.last.downvote!
 end
 
 # Reports the last message's score
@@ -79,7 +79,7 @@ def score(e, params)
     return
   end
 
-  @irc.msg(e.channel || e.nick, "#{@messages.last}: #{@messages.last_score}")
+  @irc.msg(e.channel || e.nick, "#{@messages.last.text}: #{@messages.last.score}")
 end
 
 def help(e, params)
