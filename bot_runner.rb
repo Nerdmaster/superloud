@@ -14,6 +14,7 @@ require 'rubygems'
 # Want a specific version of net/yail?  Try uncommenting this:
 # gem 'net-yail', '1.x.y'
 
+gem "net-yail", "1.6.0"
 require 'net/yail'
 require 'getopt/long'
 
@@ -70,12 +71,12 @@ init_daily_data
 # this is a safe operation.
 @irc.on_invite { |e| @irc.join(e.channel) }
 
-# This is just another callback, using the do/end block form.  We auto-message the channel on join.
-@irc.on_join do |e|
-  if e.nick == @irc.me
-    @irc.msg(e.channel, "WHATS WRONG WITH BEING SEXY")
-    @channel_list.push(e.channel)
-  end
+# This is just another callback, using the do/end block form.  We auto-message the channel on join,
+# but only if the nick is @irc.me.  This is done using the conditional filtering syntax which makes
+# code slightly shorter, but a lot less readable!  AWESOME!
+@irc.on_join(:if => lambda {|e| e.nick == @irc.me}) do |e|
+  @irc.msg(e.channel, "WHATS WRONG WITH BEING SEXY")
+  @channel_list.push(e.channel)
 end
 
 # You should *never* override the on_ping callback unless you handle the PONG manually!!
