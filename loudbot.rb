@@ -27,6 +27,59 @@ def init_daily_data
   @last_ping_day = Date.today
 end
 
+# Given the text, checks various conditions, and calls the block with a status to be used in
+# determining if the message should be ignored, responded to, and/or saved
+def is_it_loud?(text, &block)
+  errors = []
+
+  # No lowercase
+  errors.push("includes lowercase letters") if text =~ /[a-z]/
+
+  # Count various exciting things
+  len = text.length
+  words = text.split(/[^A-Z']+/)
+  letters = text.scan(/[A-Z]/)
+  uppercase_count = letters.length
+
+  # Rules are getting complex - let's handle them one at a time
+  errors.push("too short") if len < 11
+  errors.push("too low uppercase ratio") if uppercase_count < len * 0.60
+  errors.push("shut up") if (text =~ /retard/ || text =~ /reetard/)
+
+  # If there are any errors, the text is bad and nothing else needs to happen
+  unless errors.empty?
+    yield(:bad, errors.join(", "))
+    return
+  end
+
+  # Throw out any words that are obvious nonsense
+  nonsense = []
+  for word in words.dup
+    # I and A are valid words
+    next if word.length == 1
+
+    # No vowels?  NO WORD!
+    nonsense.push(words.delete(word)) if word =~ /^[^AEIOUY]+$/
+
+    # Vowels only?  NO WORD!!
+    nonsense.push(words.delete(word)) if word =~ /^[AEIOU]+$/
+  end
+
+  # Fewer than 2 unique words *or* half the words aren't unique?  GTFO!
+  errors.push("too few unique words") if words.uniq.count < 2 || words.uniq.count <= words.count / 2
+
+  # What about letters per word?!?
+  errors.push("words are too small") if (words.count > 0) && (letters.count / words.count < 3.0)
+
+  unless errors.empty?
+    yield(:rejected, errors.join(", "))
+    return
+  end
+
+  # WE MADE IT OMG
+  yield(:loud, "loud")
+end
+
 # This is our main message handler.
 #
 # We store and respond if messages meet the following criteria:
@@ -43,59 +96,24 @@ def incoming_message(e)
 
   text = e.message
 
-  return if text =~ /[a-z]/
+  # Check all the various conditions for responding to the message and including the message
+  is_it_loud?(text) do |status, reason|
+    case status
+      when :bad
+        @irc.log.debug "Ignoring message: #{reason}"
+        return
 
-  # Count various exciting things
-  len = text.length
-  words = text.split(/[^A-Z']+/)
-  letters = text.scan(/[A-Z]/)
-  uppercase_count = letters.length
+      when :rejected
+        random_message(e.channel)
+        @irc.log.debug "Rejecting message: #{reason}"
 
-  # Rules are getting complex - let's handle them one at a time
-  return if len < 11
-  return if uppercase_count < len * 0.60
-  return if text =~ /retard/
-  return if text =~ /reetard/
-
-  # At this point it's close enough, so let's at least spit out a response
-  random_message(e.channel)
-
-  # Throw out any words that are obvious nonsense
-  nonsense = []
-  for word in words.dup
-    # I and A are valid words
-    next if word.length == 1
-
-    # No vowels?  NO WORD!
-    nonsense.push(words.delete(word)) if word =~ /^[^AEIOUY]+$/
-
-    # Vowels only?  NO WORD!!
-    nonsense.push(words.delete(word)) if word =~ /^[AEIOU]+$/
+      when :loud
+        @irc.log.debug "IT WAS LOUD!  #{text.inspect}"
+        random_message(e.channel)
+        @messages.add(text, e.nick)
+    end
   end
 
-  @irc.log.debug "Rejected #{nonsense.inspect} as nonsense words" unless nonsense.empty?
-
-  # Always exit if we only ended up with one unique word
-  if words.uniq.count == 1
-    @irc.log.debug "Rejected #{words.inspect} - only one unique word"
-    return
-  end
-
-  # Half the words aren't unique?  GTFO!
-  if words.uniq.count <= words.count / 2
-    @irc.log.debug "Rejected #{words.inspect} - too few unique words"
-    return
-  end
-
-  # What about letters per word?!?
-  if letters.count / words.count < 3.0
-    @irc.log.debug "Rejected #{text.inspect} - words are too small"
-    return
-  end
-
-  # WE MADE IT OMG
-  @irc.log.debug "IT WAS LOUD!  #{text.inspect}"
-  @messages.add(text, e.nick)
 end
 
 # Pulls a random message from our messages array and sends it to the given channel
