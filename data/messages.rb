@@ -8,9 +8,14 @@ module Data
 class Message
   attr_reader :author, :views, :score, :text
 
-  def initialize(text, author)
-    @@messages ||= Louds::Data::Messages.instance
+  @@messages = nil
 
+  def self.messages
+    @@messages ||= Louds::Data::Messages.instance
+    return @@messages
+  end
+
+  def initialize(text, author)
     @text = text
     @author = author
     @views = 0
@@ -19,17 +24,17 @@ class Message
 
   def view!
     @views += 1
-    @@messages.dirty!
+    Message.messages.dirty!
   end
 
   def upvote!
     @score += 1
-    @@messages.dirty!
+    Message.messages.dirty!
   end
 
   def downvote!
     @score -= 1
-    @@messages.dirty!
+    Message.messages.dirty!
   end
 end
 
