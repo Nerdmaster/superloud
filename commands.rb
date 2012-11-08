@@ -79,7 +79,7 @@ def score(e, params)
     return
   end
 
-  @irc.msg(e.channel || e.nick, "#{@messages.last.text}: #{@messages.last.score}")
+  @irc.msg(e.channel || e.nick, "#{@messages.last.text}: #{@messages.last.score}, SUBMITTED BY #{@messages.last.author}")
 end
 
 def help(e, params)
