@@ -1,6 +1,7 @@
 # This file holds all methods related to accessing the louds message data
 
 require "singleton"
+require "yaml"
 
 module Louds
 module Data
