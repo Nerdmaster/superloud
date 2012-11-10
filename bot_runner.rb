@@ -63,7 +63,7 @@ init_daily_data
 #####
 
 # This is a filter.  Because it's past-tense ("heard"), it runs after the server's welcome message
-# has been read - i.e., after any before-filters and the main hanler happen.
+# has been read - i.e., after any before-filters and the main handler happen.
 @irc.heard_welcome { |e| @irc.join(opt['channel']) if opt['channel'] }
 
 # on_xxx means it's a callback for an incoming event.  Callbacks run after before-filters, and
