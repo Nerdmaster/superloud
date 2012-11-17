@@ -8,8 +8,8 @@ describe "Messages" do
   before(:each) do
     @messages = Louds::Data::Messages.new
     @data = {
-      "FIRST" => Louds::Data::Message.new("FIRST", "Somebody"),
-      "SECOND" => Louds::Data::Message.new("SECOND", "Another Person")
+      "FIRST" => {:text => "FIRST", :author => "Somebody"},
+      "SECOND" => {:text => "SECOND", :author => "Another Person"}
     }
     YAML.stub(:load_file => @data)
     @messages.load
