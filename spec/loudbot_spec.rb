@@ -42,13 +42,13 @@ describe "loudbot.rb" do
 
     it "should spit out the text from @messages.random" do
       @messages.should_receive(:random).and_return(@message)
-      @irc.should_receive(:msg).with("foo", @message.text)
-      random_message("foo")
+      @irc.should_receive(:msg).with("#channel", @message.text)
+      random_message("#channel")
     end
 
     it "should tell the message it's been viewed" do
       @message.should_receive(:view!).once
-      random_message("foo")
+      random_message("#channel")
     end
   end
 
