@@ -10,11 +10,18 @@ class Message
   attr_reader :author, :views, :score, :text
   attr_accessor :container
 
-  def initialize(text, author)
+  # Loads a message's attributes from a hash
+  def self.from_hash(hsh)
+    msg = Message.new(hsh[:text], hsh[:author], hsh[:score], hsh[:views])
+
+    return msg
+  end
+
+  def initialize(text, author, score = 1, views = 0)
     @text = text
     @author = author
-    @views = 0
-    @score = 1
+    @views = views
+    @score = score
   end
 
   def view!
@@ -30,6 +37,11 @@ class Message
   def downvote!
     @score -= 1
     @container.dirty!
+  end
+
+  # Converts all important attributes to a hash of data, primarily to ease exporting
+  def to_hash
+    return { :author => @author, :views => @views, :score => @score, :text => @text }
   end
 end
 
@@ -52,6 +64,13 @@ class Messages
     # the text as the index as this allows easier lookups (until we go fully db).
     @messages = FileTest.exist?(@@file) ? YAML.load_file(@@file) :
                 {"ROCK ON WITH SUPERLOUD" => Message.new("ROCK ON WITH SUPERLOUD", "SUPERLOUD")}
+
+    # Convert from data hash to Message object
+    @messages.each do |text, data|
+      @messages[text] = Message.from_hash(data)
+      @messages[text].container = self
+    end
+
     @random_messages = @messages.keys.shuffle
     @dirty = false
   end
@@ -59,6 +78,7 @@ class Messages
   # Stores the given string if it isn't already stored, setting the score to 1
   def add(string, author)
     @messages[string] ||= Message.new(string, author)
+    @messages[string].container = self
     dirty!
   end
 

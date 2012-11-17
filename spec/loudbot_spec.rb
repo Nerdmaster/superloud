@@ -8,10 +8,11 @@ require File.dirname(__FILE__) + '/../data/messages'
 describe "loudbot.rb" do
   before(:each) do
     # Hack fake yaml data
+    @messages = Louds::Data::Messages.new
     File.stub(:exists? => true)
     @data = {
-      "FIRST" => Louds::Data::Message.new("FIRST", "Somebody"),
-      "SECOND" => Louds::Data::Message.new("SECOND", "Another Person")
+      "FIRST" => {:text => "FIRST", :author => "Somebody"},
+      "SECOND" => {:text => "SECOND", :author => "Another Person"}
     }
     YAML.stub(:load_file => @data)
 
