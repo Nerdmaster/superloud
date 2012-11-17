@@ -58,8 +58,12 @@ describe "loudbot.rb" do
       @logger = double("logger")
       @logger.stub(:debug)
       @irc.stub(:log => @logger)
-      @messages = Louds::Data::Messages.new
-      self.stub(:random_message)
+
+      # Hack random message to produce an openstruct that has stubbing so nothing breaks
+      # (For some reason stubbing self.random_message stopped working)
+      @message = OpenStruct.new(:text => "blah")
+      @message.stub(:view!)
+      @messages.stub(:random => @message)
 
       @invalid_case         = "IT'S ONLY VALID IF ALL WORDS ARE UPPERCASE COMPLETELy"
       @invalid_length       = "LOUD SHORT"
