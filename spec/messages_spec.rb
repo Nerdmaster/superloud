@@ -6,7 +6,7 @@ require File.dirname(__FILE__) + '/../data/messages'
 
 describe "Messages" do
   before(:each) do
-    @messages = Louds::Data::Messages.instance
+    @messages = Louds::Data::Messages.new
     @data = {
       "FIRST" => Louds::Data::Message.new("FIRST", "Somebody"),
       "SECOND" => Louds::Data::Message.new("SECOND", "Another Person")

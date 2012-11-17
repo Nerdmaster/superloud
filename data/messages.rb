@@ -34,8 +34,6 @@ class Message
 end
 
 class Messages
-  include Singleton
-
   attr_reader :last
 
   @@file = "loud_messages.yml"

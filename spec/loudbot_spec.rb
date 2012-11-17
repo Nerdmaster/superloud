@@ -35,8 +35,8 @@ describe "loudbot.rb" do
 
   describe "#random_message" do
     before(:each) do
-      @messages = Louds::Data::Messages.instance
-      @message = Louds::Data::Message.new("foo", "bar")
+      @message = OpenStruct.new(:text => "blah")
+      @message.stub(:view!)
       @messages.stub(:random => @message)
     end
 
@@ -57,7 +57,7 @@ describe "loudbot.rb" do
       @logger = double("logger")
       @logger.stub(:debug)
       @irc.stub(:log => @logger)
-      @messages = Louds::Data::Messages.instance
+      @messages = Louds::Data::Messages.new
       self.stub(:random_message)
 
       @invalid_case         = "IT'S ONLY VALID IF ALL WORDS ARE UPPERCASE COMPLETELy"

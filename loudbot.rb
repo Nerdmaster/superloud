@@ -3,7 +3,7 @@ require "./data/messages"
 # Sets up one-time data when loudbot starts
 def init_data
   # Initialize message data object
-  @messages = Louds::Data::Messages.instance
+  @messages = Louds::Data::Messages.new
   @messages.load
 
   @channel_list = []

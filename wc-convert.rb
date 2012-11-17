@@ -6,7 +6,7 @@ require "./data/messages"
 
 lines = IO.readlines("log.txt")
 
-@messages = Louds::Data::Messages.instance
+@messages = Louds::Data::Messages.new
 @messages.load
 
 for line in lines
