@@ -62,13 +62,13 @@ class Messages
     # Louds messages are now a complex data structure that contains text, author, score, and
     # times viewed.  There is no conversion, sorry.  The messages are still stored in a hash with
     # the text as the index as this allows easier lookups (until we go fully db).
-    @messages = FileTest.exist?(@@file) ? YAML.load_file(@@file) :
+    raw_messages = FileTest.exist?(@@file) ? YAML.load_file(@@file) :
                 {"ROCK ON WITH SUPERLOUD" => Message.new("ROCK ON WITH SUPERLOUD", "SUPERLOUD")}
 
     # Convert from data hash to Message object
-    @messages.each do |text, data|
-      @messages[text] = Message.from_hash(data)
-      @messages[text].container = self
+    raw_messages.each do |data|
+      @messages[data[:text]] = Message.from_hash(data)
+      @messages[data[:text]].container = self
     end
 
     @random_messages = @messages.keys.shuffle
@@ -102,7 +102,10 @@ class Messages
   def serialize
     return unless dirty?
 
-    File.open(@@file, "w") {|f| f.puts @messages.to_yaml}
+    # Convert from Message objects to raw hashes
+    hashes = []
+    @messages.each {|k, v| hashes.push v.to_hash}
+    File.open(@@file, "w") {|f| f.puts hashes.to_yaml}
     @dirty = false
   end
 end
