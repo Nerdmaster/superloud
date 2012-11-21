@@ -10,10 +10,10 @@ describe "loudbot.rb" do
     # Hack fake yaml data
     @messages = Louds::Data::Messages.new
     File.stub(:exists? => true)
-    @data = {
-      "FIRST" => {:text => "FIRST", :author => "Somebody"},
-      "SECOND" => {:text => "SECOND", :author => "Another Person"}
-    }
+    @data = [
+      {:text => "FIRST", :author => "Somebody"},
+      {:text => "SECOND", :author => "Another Person"}
+    ]
     YAML.stub(:load_file => @data)
 
     # Set up fake data to ease IRC message tests

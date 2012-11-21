@@ -7,10 +7,10 @@ require File.dirname(__FILE__) + '/../data/messages'
 describe "Messages" do
   before(:each) do
     @messages = Louds::Data::Messages.new
-    @data = {
-      "FIRST" => {:text => "FIRST", :author => "Somebody"},
-      "SECOND" => {:text => "SECOND", :author => "Another Person"}
-    }
+    @data = [
+      {:text => "FIRST", :author => "Somebody"},
+      {:text => "SECOND", :author => "Another Person"}
+    ]
     YAML.stub(:load_file => @data)
     @messages.load
 
@@ -22,7 +22,7 @@ describe "Messages" do
   describe "#random" do
     it "should pop a message from the random array and return it" do
       @rnd.should_receive(:pop).once.and_return("FIRST")
-      @messages.random.should eq(@data["FIRST"])
+      @messages.random.should eq(Louds::Data::Message.from_hash(@data.first))
     end
 
     it "should reshuffle the messages array if random messages are empty" do
