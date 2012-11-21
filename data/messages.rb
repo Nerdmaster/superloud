@@ -21,11 +21,10 @@ class Messages
 
   # Populates the message structure so that random items can be produced
   def load
-    # Louds messages are now a complex data structure that contains text, author, score, and
-    # times viewed.  There is no conversion, sorry.  The messages are still stored in a hash with
-    # the text as the index as this allows easier lookups (until we go fully db).
-    raw_messages = FileTest.exist?(@@file) ? YAML.load_file(@@file) :
-                {"ROCK ON WITH SUPERLOUD" => Message.new("ROCK ON WITH SUPERLOUD", "SUPERLOUD")}
+    raw_messages = retrieve_messages
+    if raw_messages.empty?
+      raw_messages = [Message.new("ROCK ON WITH SUPERLOUD", "SUPERLOUD")]
+    end
 
     # Convert from data hash to Message object
     raw_messages.each do |data|
@@ -35,6 +34,11 @@ class Messages
 
     @random_messages = @messages.keys.shuffle
     @dirty = false
+  end
+
+  # YAML-specific method for pulling data - returns an empty array if the YAML file isn't there
+  def retrieve_messages
+    return FileTest.exist?(@@file) ? YAML.load_file(@@file) : []
   end
 
   # Stores the given string if it isn't already stored, setting the score to 1
