@@ -25,16 +25,20 @@ class Message
 
   def view!
     @views += 1
-    @container.dirty!
+    changed!
   end
 
   def upvote!
     @score += 1
-    @container.dirty!
+    changed!
   end
 
   def downvote!
     @score -= 1
+    changed!
+  end
+
+  def changed!
     @container.dirty!
   end
 
