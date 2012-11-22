@@ -8,19 +8,11 @@ class Message
   include Comparable
 
   # Loads a message's attributes from a hash
-  def self.from_hash(hsh)
-    hsh[:score] ||= 1
-    hsh[:views] ||= 0
-    msg = Message.new(hsh[:text], hsh[:author], hsh[:score], hsh[:views])
-
-    return msg
-  end
-
-  def initialize(text, author, score = 1, views = 0)
-    @text = text
-    @author = author
-    @views = views
-    @score = score
+  def initialize(data)
+    @text = data[:text]
+    @author = data[:author]
+    @views = data[:views] || 0
+    @score = data[:score] || 1
   end
 
   def view!

@@ -33,8 +33,8 @@ describe "loudbot.rb" do
       msgs = @messages.instance_variable_get("@messages")
       msgs.length.should eq(2)
       msgs.keys.sort.should eq(["FIRST", "SECOND"])
-      msgs["FIRST"].should eq(Louds::Data::Message.from_hash(@data[0]))
-      msgs["SECOND"].should eq(Louds::Data::Message.from_hash(@data[1]))
+      msgs["FIRST"].should eq(Louds::Data::Message.new(@data[0]))
+      msgs["SECOND"].should eq(Louds::Data::Message.new(@data[1]))
 
       @messages.instance_variable_get("@random_messages").sort.should eq(["FIRST", "SECOND"])
     end

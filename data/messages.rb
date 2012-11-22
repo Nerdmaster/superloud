@@ -39,7 +39,7 @@ class Messages
 
     # Convert from data hash to Message object
     raw_messages.each do |data|
-      @messages[data[:text]] = Message.from_hash(data)
+      @messages[data[:text]] = Message.new(data)
       @messages[data[:text]].container = self
     end
 

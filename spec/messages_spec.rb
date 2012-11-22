@@ -5,8 +5,8 @@ require File.dirname(__FILE__) + '/../data/messages'
 describe "Messages" do
   before(:each) do
     @data = [
-      {:text => "FIRST", :author => "Somebody"},
-      {:text => "SECOND", :author => "Another Person"}
+      {:text => "FIRST", :author => "Somebody", :views => 0, :score => 1},
+      {:text => "SECOND", :author => "Another Person", :views => 0, :score => 1}
     ]
     @messages = Louds::Data::Messages.new("fakeyfake")
     @messages.stub(:retrieve_messages => @data)
@@ -34,7 +34,7 @@ describe "Messages" do
 
     it "should pop a message from the random array and return it" do
       @rnd.should_receive(:pop).once.and_return("FIRST")
-      @messages.random.should eq(Louds::Data::Message.from_hash(@data.first))
+      @messages.random.should eq(Louds::Data::Message.new(@data.first))
     end
 
     it "should reshuffle the messages array if random messages are empty" do
