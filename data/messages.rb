@@ -51,8 +51,12 @@ class Messages
   # Stores the given string if it isn't already stored, setting the score to 1
   def add(data)
     string = data[:text]
-    @messages[string] ||= Message.new(data)
-    @messages[string].container = self
+    return if @messages[string]
+
+    message = Message.new(data)
+    @messages[string] = message
+    message.container = self
+
     dirty!
   end
 
