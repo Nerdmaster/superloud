@@ -12,14 +12,28 @@ describe "Messages" do
     ]
     @messages = Louds::Data::Messages.new("fakeyfake")
     @messages.stub(:retrieve_messages => @data)
-    @messages.load
 
     # Alias private data for easier testing
     @rnd = @messages.instance_variable_get("@random_messages")
     @msg = @messages.instance_variable_get("@messages")
   end
 
+  describe "#load" do
+    it "should convert the array from retrieve_messages into Message objects" do
+      @msg.should eq({})
+      @messages.load
+      @msg.size.should eq(2)
+      @msg["FIRST"].to_hash.should eq(@data[0])
+      @msg["SECOND"].to_hash.should eq(@data[1])
+    end
+  end
+
   describe "#random" do
+    before(:each) do
+      # Auto-load messages for these tests
+      @messages.load
+    end
+
     it "should pop a message from the random array and return it" do
       @rnd.should_receive(:pop).once.and_return("FIRST")
       @messages.random.should eq(Louds::Data::Message.from_hash(@data.first))

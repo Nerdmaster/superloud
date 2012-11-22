@@ -25,6 +25,9 @@ class Messages
 
   # Populates the message structure so that random items can be produced
   def load
+    @messages.clear
+    @random_messages.clear
+
     raw_messages = retrieve_messages
     if raw_messages.empty?
       raw_messages = [{:text => "ROCK ON WITH SUPERLOUD", :author => "SUPERLOUD"}]
@@ -36,7 +39,7 @@ class Messages
       @messages[data[:text]].container = self
     end
 
-    @random_messages = @messages.keys.shuffle
+    @random_messages.push(*@messages.keys.shuffle)
     @dirty = false
   end
 
