@@ -1,7 +1,5 @@
 require "rubygems"
 require "rspec"
-require "yaml"
-require "ostruct"
 require File.dirname(__FILE__) + '/../data/messages'
 
 describe "Messages" do
