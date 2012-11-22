@@ -93,7 +93,7 @@ describe "loudbot.rb" do
 
     it "should add valid phrase to message stash" do
       @event.nick = "Dude"
-      @messages.should_receive(:add).with(@valid, "Dude")
+      @messages.should_receive(:add).with(:text => @valid, :author => "Dude")
       @event.message = @valid
       incoming_message(@event)
     end

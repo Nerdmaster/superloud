@@ -35,7 +35,7 @@ for line in lines
   # Ignore messages containing bot's name
   next if text =~ /SUPERLOUD/
 
-  @messages.add(text, user)
+  @messages.add(:text => text, :author => user)
 end
 
 @messages.serialize

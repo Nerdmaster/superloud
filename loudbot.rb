@@ -110,7 +110,7 @@ def incoming_message(e)
       when :loud
         @irc.log.debug "IT WAS LOUD!  #{text.inspect}"
         random_message(e.channel)
-        @messages.add(text, e.nick)
+        @messages.add(:text => text, :author => e.nick)
     end
   end
 

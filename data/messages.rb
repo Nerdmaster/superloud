@@ -49,8 +49,9 @@ class Messages
   end
 
   # Stores the given string if it isn't already stored, setting the score to 1
-  def add(string, author)
-    @messages[string] ||= Message.new(string, author)
+  def add(data)
+    string = data[:text]
+    @messages[string] ||= Message.new(data)
     @messages[string].container = self
     dirty!
   end
