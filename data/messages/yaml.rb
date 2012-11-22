@@ -12,14 +12,11 @@ class Louds::Data::Messages::YAML < Louds::Data::Messages
   end
 
   # Stores messages into a YAML file
-  def serialize
-    return unless dirty?
-
+  def write_data
     # Convert from Message objects to raw hashes
     hashes = []
     @messages.each {|k, v| hashes.push v.to_hash}
     File.open(@file, "w") {|f| f.puts hashes.to_yaml}
-    @dirty = false
   end
 end
 

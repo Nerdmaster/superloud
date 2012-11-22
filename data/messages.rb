@@ -76,8 +76,17 @@ class Messages
     @dirty = true
   end
 
-  # Must be implemented in the subclass
+  # Calls write_data and clears all dirty state info
   def serialize
+    return unless dirty?
+
+    write_data
+
+    @dirty = false
+  end
+
+  # Must be implemented in the subclass
+  def write_data
     raise NotImplementedError
   end
 end
