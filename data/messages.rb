@@ -20,6 +20,8 @@ class Messages
     @dirty = false
     @messages = {}
     @random_messages = []
+    @new_messages = []
+    @changed_messages = []
     @last = nil
   end
 
@@ -27,6 +29,8 @@ class Messages
   def load
     @messages.clear
     @random_messages.clear
+    @new_messages.clear
+    @changed_messages.clear
 
     raw_messages = retrieve_messages
     if raw_messages.empty?
@@ -57,7 +61,7 @@ class Messages
     @messages[string] = message
     message.container = self
 
-    dirty!
+    dirty!(:new => message)
   end
 
   # Pulls a random message, reloading the data if necessary
@@ -72,8 +76,15 @@ class Messages
     return @dirty
   end
 
-  def dirty!
+  def dirty!(changes = {})
     @dirty = true
+
+    for type, items in changes
+      case type
+        when :new     then @new_messages.push(*items)
+        when :changed then @changed_messages.push(*items)
+      end
+    end
   end
 
   # Calls write_data and clears all dirty state info
@@ -83,6 +94,8 @@ class Messages
     write_data
 
     @dirty = false
+    @new_messages.clear
+    @changed_messages.clear
   end
 
   # Must be implemented in the subclass

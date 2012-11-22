@@ -39,7 +39,7 @@ class Message
   end
 
   def changed!
-    @container.dirty!
+    @container.dirty!(:changed => self)
   end
 
   # Converts all important attributes to a hash of data, primarily to ease exporting
