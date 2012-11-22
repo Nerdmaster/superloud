@@ -6,12 +6,12 @@ require File.dirname(__FILE__) + '/../data/messages'
 
 describe "Messages" do
   before(:each) do
-    @messages = Louds::Data::Messages.new
     @data = [
       {:text => "FIRST", :author => "Somebody"},
       {:text => "SECOND", :author => "Another Person"}
     ]
-    YAML.stub(:load_file => @data)
+    @messages = Louds::Data::Messages.new("fakeyfake")
+    @messages.stub(:retrieve_messages => @data)
     @messages.load
 
     # Alias private data for easier testing

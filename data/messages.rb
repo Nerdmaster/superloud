@@ -1,18 +1,22 @@
 # This file holds all methods related to accessing the louds message data
 
-require "singleton"
-require "yaml"
 require File.dirname(__FILE__) + '/message'
+require File.dirname(__FILE__) + "/messages/yaml.rb"
 
 module Louds
 module Data
 
+# Factory class for the message container - filename determines which class to actually instantiate:
+# * `*.yml` is Louds::Data::Messages::YAML
+# * `*.db` is Louds::Data::Messages::SQLite
+#
+# TODO: Auto-pull all files in messages/ and let them register what filetype they use so one could
+# easily "plug in" a new format.
 class Messages
   attr_reader :last
 
-  @@file = "loud_messages.yml"
-
-  def initialize
+  def initialize(filename)
+    @file = filename
     @dirty = false
     @messages = {}
     @random_messages = []
@@ -23,7 +27,7 @@ class Messages
   def load
     raw_messages = retrieve_messages
     if raw_messages.empty?
-      raw_messages = [Message.new("ROCK ON WITH SUPERLOUD", "SUPERLOUD")]
+      raw_messages = [{:text => "ROCK ON WITH SUPERLOUD", :author => "SUPERLOUD"}]
     end
 
     # Convert from data hash to Message object
@@ -36,9 +40,9 @@ class Messages
     @dirty = false
   end
 
-  # YAML-specific method for pulling data - returns an empty array if the YAML file isn't there
+  # Must be implemented in the subclass
   def retrieve_messages
-    return FileTest.exist?(@@file) ? YAML.load_file(@@file) : []
+    raise NotImplementedError
   end
 
   # Stores the given string if it isn't already stored, setting the score to 1
@@ -64,15 +68,19 @@ class Messages
     @dirty = true
   end
 
-  # Stores messages into a YAML file
+  # Must be implemented in the subclass
   def serialize
-    return unless dirty?
+    raise NotImplementedError
+  end
+end
 
-    # Convert from Message objects to raw hashes
-    hashes = []
-    @messages.each {|k, v| hashes.push v.to_hash}
-    File.open(@@file, "w") {|f| f.puts hashes.to_yaml}
-    @dirty = false
+class Messages::Factory
+  # Generates the appropriate messages object based on file type
+  def self.create(filename)
+    case File.extname(filename)
+      when ".yml", ".yaml"    then return Louds::Data::Messages::YAML.new(filename)
+      when ".db", ".sqlite"   then return Louds::Data::Messages::SQLite.new(filename)
+    end
   end
 end
 
