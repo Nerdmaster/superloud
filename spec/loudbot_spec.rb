@@ -7,15 +7,15 @@ require File.dirname(__FILE__) + '/../data/messages'
 
 describe "loudbot.rb" do
   before(:each) do
-    # Hack fake yaml data
-    File.stub(:exists? => true)
     @data = [
       {:text => "FIRST", :author => "Somebody"},
       {:text => "SECOND", :author => "Another Person"}
     ]
-    YAML.stub(:load_file => @data)
 
-    @messages = Louds::Data::Messages::Factory.create("foo.yml")
+    # Make sure we never produce a legitimate YAML / sqlite factory
+    @messages = Louds::Data::Messages.new("foo.yml")
+    Louds::Data::Messages::Factory.stub(:create => @messages)
+    @messages.stub(:retrieve_messages => @data)
 
     # Set up fake data to ease IRC message tests
     @irc = double("Net::YAIL")
