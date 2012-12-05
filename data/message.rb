@@ -2,7 +2,7 @@ module Louds
 module Data
 
 class Message
-  attr_reader :author, :views, :score, :text
+  attr_reader :author, :views, :score, :text, :uid
   attr_accessor :container
 
   include Comparable
@@ -13,6 +13,7 @@ class Message
     @author = data[:author] || data["author"]
     @views = data[:views] || data["views"] || 0
     @score = data[:score] || data["score"] || 1
+    @uid = data[:uid] || data["uid"]
   end
 
   def view!
