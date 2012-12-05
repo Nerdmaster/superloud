@@ -38,10 +38,7 @@ class Messages
     end
 
     # Convert from data hash to Message object
-    raw_messages.each do |data|
-      @messages[data[:text]] = Message.new(data)
-      @messages[data[:text]].container = self
-    end
+    raw_messages.each {|data| new_message!(data)}
 
     @random_messages.push(*@messages.keys.shuffle)
     @dirty = false
@@ -57,11 +54,17 @@ class Messages
     string = data[:text]
     return if @messages[string]
 
-    message = Message.new(data)
-    @messages[string] = message
-    message.container = self
+    message = new_message!(data)
 
     dirty!(:new => message)
+  end
+
+  # Creates a new message object using the given data hash and stores it in our container hash.
+  def new_message!(data)
+    message = Message.new(data)
+    message.container = self
+    @messages[data[:text]] = message
+    return message
   end
 
   # Pulls a random message, reloading the data if necessary
