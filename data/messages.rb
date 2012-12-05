@@ -49,14 +49,16 @@ class Messages
     raise NotImplementedError
   end
 
+  # Returns true if the given message text already exists - must be overridden at the subclass
+  def exists?(text)
+    raise NotImplementedError
+  end
+
   # Stores the given string if it isn't already stored, setting the score to 1
   def add(data)
-    string = data[:text]
-    return if @messages[string]
-
+    return if exists?(data[:text])
     message = new_message!(data)
-
-    dirty!(:new => message)
+    dirty!(:new => new_message!(data))
   end
 
   # Creates a new message object using the given data hash and stores it in our container hash.
