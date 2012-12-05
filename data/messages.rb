@@ -1,7 +1,6 @@
 # This file holds all methods related to accessing the louds message data
 
 require File.dirname(__FILE__) + '/message'
-require File.dirname(__FILE__) + "/messages/yaml.rb"
 
 module Louds
 module Data
@@ -106,16 +105,6 @@ class Messages
   # Must be implemented in the subclass
   def write_data
     raise NotImplementedError
-  end
-end
-
-class Messages::Factory
-  # Generates the appropriate messages object based on file type
-  def self.create(filename)
-    case File.extname(filename)
-      when ".yml", ".yaml"    then return Louds::Data::Messages::YAML.new(filename)
-      when ".db", ".sqlite"   then return Louds::Data::Messages::SQLite.new(filename)
-    end
   end
 end
 

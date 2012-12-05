@@ -1,4 +1,4 @@
-require "./data/messages"
+require "./data/messages/factory"
 
 # Sets up one-time data when loudbot starts
 def init_data
