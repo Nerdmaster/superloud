@@ -9,10 +9,10 @@ class Message
 
   # Loads a message's attributes from a hash
   def initialize(data)
-    @text = data[:text]
-    @author = data[:author]
-    @views = data[:views] || 0
-    @score = data[:score] || 1
+    @text = data[:text] || data["text"]
+    @author = data[:author] || data["author"]
+    @views = data[:views] || data["views"] || 0
+    @score = data[:score] || data["score"] || 1
   end
 
   def view!
