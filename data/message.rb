@@ -11,9 +11,9 @@ class Message
   def initialize(data)
     @text = data[:text] || data["text"]
     @author = data[:author] || data["author"]
-    @views = data[:views] || data["views"] || 0
-    @score = data[:score] || data["score"] || 1
-    @uid = data[:uid] || data["uid"]
+    @views = (data[:views] || data["views"] || 0).to_i
+    @score = (data[:score] || data["score"] || 1).to_i
+    @uid = (data[:uid] || data["uid"]).to_i
   end
 
   def view!
