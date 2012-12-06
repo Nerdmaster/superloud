@@ -56,7 +56,6 @@ class Messages
   # Stores the given string if it isn't already stored, setting the score to 1
   def add(data)
     return if exists?(data[:text])
-    message = new_message!(data)
     dirty!(:new => new_message!(data))
   end
 
