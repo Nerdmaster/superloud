@@ -63,7 +63,7 @@ class Messages
   def new_message!(data)
     message = Message.new(data)
     message.container = self
-    @messages[data[:text]] = message
+    @messages[message.text] = message
     return message
   end
 
