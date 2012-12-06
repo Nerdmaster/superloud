@@ -3,7 +3,7 @@ require "./data/messages/factory"
 # Sets up one-time data when loudbot starts
 def init_data
   # Initialize message data object
-  @messages = Louds::Data::Messages::Factory.create("loud_messages.yml")
+  @messages = Louds::Data::Messages::Factory.create("louds.db")
   @messages.load
 
   @channel_list = []
