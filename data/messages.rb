@@ -88,6 +88,8 @@ class Messages
         when :changed then @changed_messages.push(*items)
       end
     end
+
+    @changed_messages.uniq!
   end
 
   # Calls write_data and clears all dirty state info
