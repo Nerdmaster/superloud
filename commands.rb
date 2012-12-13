@@ -31,7 +31,7 @@ def biggestdong(e, params)
   end
 
   nick = big_winner[:nick]
-  cm = big_winner[:size]
+  cm = big_winner[:size] / 2.0
   inches = cm / 2.54
 
   tielist.sort!
@@ -41,9 +41,9 @@ def biggestdong(e, params)
   end
 
   if (tielist.length <=1)
-    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH IS %0.1f INCHES (%d CM)" % [inches, cm])
+    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH IS %0.1f INCHES (%0.1f CM)" % [inches, cm])
   else
-    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{tie_text.upcase}!  THEY'RE %s %0.1f INCHES (%d CM)!!!1!!" % [(tielist.length == 2 ? "BOTH" : "ALL"), inches, cm])
+    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{tie_text.upcase}!  THEY'RE %s %0.1f INCHES (%0.1f CM)!!!1!!" % [(tielist.length == 2 ? "BOTH" : "ALL"), inches, cm])
   end
 end
 
@@ -128,10 +128,10 @@ def size(e, params)
   for key, data in @size_data
     datanick = data[:nick].upcase
     if datanick == name
-     cm = data[:size]
+     cm = data[:size] / 2.0
      inches = cm / 2.54
      fmt = name == e.nick.upcase ? "HEY %s YOUR DONG IS" : "%s'S DONG IS"
-     msg = "#{fmt} %0.1f INCHES (%d CM)" % [name, inches, cm]
+     msg = "#{fmt} %0.1f INCHES (%0.1f CM)" % [name, inches, cm]
      break
     end
   end
@@ -174,12 +174,42 @@ def compute_size(e)
   # Get size by using daily seed
   size = 0
   user_seed(user_hash, mulligans * 53) do
-    size = [2, rand(20).to_i + 8 + size_modifier].max
+    size = [2, fair_dong_size + size_modifier].max
   end
 
   @size_data[user_hash] = {:size => size, :nick => e.nick}
 
   return size
+end
+
+# Returns a value in 1/2cm units of a randomized, normalized dong length
+def fair_dong_size
+  # Average is 29 units - each unit is 1/2 a cm.  This puts the average at 14.5cm, roughly 5.75
+  # inches.  Studies are conflicting about the real average, so I've just grabbed info from a
+  # wikipedia page.
+  average = 29
+
+  # Now for the fun:
+  # * Pick a normalized number from -14 to +14, normalizing so closer to 0 is more common
+  # * If < 0, user is smaller than average:
+  #   * Percent is: (100 + number * 3.5) / 100.0, giving a range of 51% to 98.25%
+  # * If > 0, user is larger than average:
+  #   * Percent is: 1 / ((100 - number * 3.5) / 100.0), giving a range of ~102% to ~196%
+  # * Multiply percent by our average, giving us final size in 1/2cm units
+  # * Range ends up being 7cm to 28cm, with most people near 14.5cm
+
+  # 4d8 - 14, where a d8 is 0-7, gives us our -14 to +14.  Since we roll 4 times, our average
+  # total over 4 rolls will more often be around 14, giving us normalization.
+  roll = rand(8) + rand(8) + rand(8) + rand(8) - 14
+
+  # This is our base % - if we're > avg, we 1/x this number
+  percent = (100 - roll.abs * 3.5) / 100.0
+
+  if roll > 0
+    percent = 1 / percent
+  end
+
+  return (percent * average).to_i
 end
 
 # Just keepin' the plagiarism alive, man.  At least in my version, size is always based on requester.
