@@ -3,7 +3,7 @@
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme
+  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme, :refresh_ignores
 ]
 
 # RPS stuff is complicated enough to centralize all functionality in here
@@ -144,6 +144,12 @@ end
 # Reports users's current dong size
 def sizeme(e, params)
   size(e, [e.nick])
+end
+
+# Reloads the ignores list if the appropriate credentials are used
+def refresh_ignores(e, params)
+  return unless params.first == @password
+  load_ignore_list
 end
 
 #####
