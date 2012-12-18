@@ -12,6 +12,9 @@ def init_data
   @rps_data ||= {}
   @rps_contestant = {}
 
+  # Set up master password
+  @password = FileTest.exist?("password.txt") ? IO.readlines("password.txt").first.strip : "chick3n"
+
   # Load ignore list
   load_ignore_list
 end
