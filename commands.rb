@@ -174,8 +174,8 @@ def compute_size(e)
   user_hash = user_hash(e.msg)
   mulligans = @redongs[user_hash]
 
-  # -2 to size for each !REDONGME command
-  size_modifier = mulligans * -2
+  # -1 to size for each !REDONGME command
+  size_modifier = mulligans * -1
 
   # Get size by using daily seed
   size = 0
@@ -190,28 +190,25 @@ end
 
 # Returns a value in 1/2cm units of a randomized, normalized dong length
 def fair_dong_size
-  # This is the "adjusted" average now.  Since we do 3d15 - 18, and the average 3d15 roll is a 21
-  # (programming die, so 0-14, not 1-15), the below average is just to give us a range.
+  # This is the "adjusted" average now and just gives us our base for the final range
   average = 28
 
   # Now for the fun:
-  # * Pick a normalized number from -18 to +24, normalizing so closer to 3 is more common
+  # * Pick a normalized number from -19 to +23, normalizing so closer to 2 is more common
   # * If <= 0, user is average or smaller
-  #   * Percent is: (100 + number * 3.5) / 100.0, giving a range of 37% to 100%
+  #   * Percent is: (100 + number * 3) / 100.0
   # * If > 0, user is larger than average:
-  #   * Percent is: 1 / ((100 - number * 2.5) / 100.0), giving a range of ~102.5% to 250%
+  #   * Percent is: (100 + number * 6) / 100.0
   # * Multiply percent by our average, giving us final size in 1/2cm units
-  # * Range ends up being 5cm to 35cm, with the average roll yielding 15cm
 
-  # 3d15 - 18, where a d15 is 0-14, gives us our -18 to +24.  Since we roll 3 times, our average
-  # total is very near +3.  Since our die is big, we still have some chaos.
-  roll = rand(15) + rand(15) + rand(15) - 18
+  # 3d15 - 18, where a d15 is 0-14, gives us our -16 to +26.  Rolling multiple dice is basically
+  # free normalization.
+  roll = rand(15) + rand(15) + rand(15) - 19
 
   if roll > 0
-    percent = (100 - roll.abs * 2.5) / 100.0
-    percent = 1 / percent
+    percent = (100 + roll * 6) / 100.0
   else
-    percent = (100 - roll.abs * 3.5) / 100.0
+    percent = (100 + roll * 3) / 100.0
   end
 
   return (percent * average).to_i
