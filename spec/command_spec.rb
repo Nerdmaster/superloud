@@ -56,8 +56,13 @@ describe "commands" do
       size(@event, ["NERDMASTER"])
     end
 
-    it "should return size in CM and inches" do
+    it "should return size in CM" do
       @irc.should_receive(:msg).with("#ngs", /40.0 CM/)
+      size(@event, ["NERDMASTER"])
+    end
+
+    it "should return size in inches" do
+      @irc.should_receive(:msg).with("#ngs", /15.7 INCHES/)
       size(@event, ["NERDMASTER"])
     end
 
