@@ -41,7 +41,7 @@ describe "commands" do
 
   describe "#size" do
     before(:each) do
-      @size_data = {:one => {:size => 40, :nick => "Nerdmaster"}}
+      @size_data = {:one => {:size => 80, :nick => "Nerdmaster"}}
       @event.nick = "JealousGuy"
     end
 
@@ -57,7 +57,7 @@ describe "commands" do
     end
 
     it "should return size in CM and inches" do
-      @irc.should_receive(:msg).with("#ngs", /40 CM/)
+      @irc.should_receive(:msg).with("#ngs", /40.0 CM/)
       size(@event, ["NERDMASTER"])
     end
 
