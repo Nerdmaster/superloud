@@ -165,4 +165,30 @@ describe "commands" do
       biggestdong(@event, [])
     end
   end
+
+  describe "#fair_dong_size" do
+    # Okay, seriously I'm not one to test that data is *exactly* a certain value for a certain
+    # input - that can get very tedious and not really help the suite.  But here, I find it is
+    # helpful just to know that the range is what I actually think it is, and to ensure that if
+    # I modify the logic, the range isn't changing without my being aware of it.
+    it "should return expected values" do
+      # Worst roll = 12
+      Dice.stub(:rand) do |sides|
+        0
+      end
+      fair_dong_size.should eq(12)
+
+      # Best roll = 66
+      Dice.stub(:rand) do |sides|
+        sides - 1
+      end
+      fair_dong_size.should eq(66)
+
+      # Most commonly rolled = 31 (this test won't work if we call rand() on an even number!)
+      Dice.stub(:rand) do |sides|
+        (sides - 1) / 2
+      end
+      fair_dong_size.should eq(31)
+    end
+  end
 end
