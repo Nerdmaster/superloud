@@ -12,7 +12,15 @@ def init_data
   @rps_data ||= {}
   @rps_contestant = {}
 
-  # Ignore list
+  # Set up master password
+  @password = FileTest.exist?("password.txt") ? IO.readlines("password.txt").first.strip : "chick3n"
+
+  # Load ignore list
+  load_ignore_list
+end
+
+# Loads the list of users to ignore
+def load_ignore_list
   @ignore_regexes = []
   ignores = FileTest.exist?("ignores.txt") ? IO.readlines("ignores.txt") : []
   for ignore in ignores
