@@ -8,6 +8,7 @@ VALID_COMMANDS = [
 
 # RPS stuff is complicated enough to centralize all functionality in here
 require "./rps/rps_command"
+require 'dice'
 
 #####
 # Command handlers
@@ -201,9 +202,9 @@ def fair_dong_size
   #   * Percent is: (100 + number * 6) / 100.0
   # * Multiply percent by our average, giving us final size in 1/2cm units
 
-  # 3d15 - 18, where a d15 is 0-14, gives us our -16 to +26.  Rolling multiple dice is basically
+  # 3d15 - 22, where a d15 is 1-15, gives us our -19 to +23.  Rolling multiple dice is basically
   # free normalization.
-  roll = rand(15) + rand(15) + rand(15) - 19
+  roll = Dice.roll(3, 15) - 22
 
   if roll > 0
     percent = (100 + roll * 6) / 100.0
