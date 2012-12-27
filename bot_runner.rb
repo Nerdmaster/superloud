@@ -19,7 +19,7 @@ require 'net/yail'
 require 'getopt/long'
 
 # Hacks Array#shuffle and Array#shuffle! for people not using the latest ruby
-require 'shuffle'
+require './lib/shuffle'
 
 # Pulls in all of loudbot's methods - filter/callback handlers for IRC events
 require './commands'
