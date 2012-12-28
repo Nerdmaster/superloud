@@ -1,6 +1,8 @@
 require "rubygems"
 require "rspec"
-require File.dirname(__FILE__) + '/../data/messages'
+
+require File.dirname(__FILE__) + '/../utils/utils'
+lib 'data/messages'
 
 describe "Messages" do
   before(:each) do

@@ -1,7 +1,9 @@
 require "rubygems"
 require "rspec"
 require "ostruct"
-require File.dirname(__FILE__) + '/../commands'
+
+require File.dirname(__FILE__) + '/../utils/utils'
+lib 'commands'
 
 describe "commands" do
   before(:each) do

@@ -7,8 +7,8 @@ VALID_COMMANDS = [
 ]
 
 # RPS stuff is complicated enough to centralize all functionality in here
-require "./rps/rps_command"
-require 'dice'
+lib "rps/rps_command"
+lib "lib/dice"
 
 #####
 # Command handlers

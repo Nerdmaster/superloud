@@ -1,5 +1,5 @@
 require "sqlite3"
-require File.expand_path(File.dirname(__FILE__) + '/../messages.rb')
+lib 'data/messages'
 
 module Louds
 module Data

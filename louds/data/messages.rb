@@ -1,6 +1,6 @@
 # This file holds all methods related to accessing the louds message data
 
-require File.dirname(__FILE__) + '/message'
+lib 'data/message'
 
 module Louds
 module Data
