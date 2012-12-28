@@ -1,9 +1,7 @@
 module Louds
 module Data
 
-require File.dirname(__FILE__) + "/../messages.rb"
-require File.dirname(__FILE__) + "/yaml.rb"
-require File.dirname(__FILE__) + "/sqlite.rb"
+lib 'data/messages', 'data/messages/yaml', 'data/messages/sqlite'
 
 class Messages::Factory
   # Generates the appropriate messages object based on file type

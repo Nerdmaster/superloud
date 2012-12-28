@@ -18,15 +18,19 @@ gem "net-yail", "1.6.0"
 require 'net/yail'
 require 'getopt/long'
 
+# Project-level includes all parts of the app expect - anything using classes in isolation should
+# require this file first!
+require "./utils/utils.rb"
+
 # Hacks Array#shuffle and Array#shuffle! for people not using the latest ruby
-require './lib/shuffle'
+lib 'lib/shuffle'
 
 # Pulls in all of loudbot's methods - filter/callback handlers for IRC events
-require './commands'
-require './loudbot'
+lib 'commands', 'loudbot'
+lib 'loudbot'
 
 # Set up RPS game
-require "./rps/rps_object"
+lib "rps/rps_object"
 RPSObject.load_rps("rps/rps.yml")
 
 # User specifies network, channel and nick
