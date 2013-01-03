@@ -75,6 +75,14 @@ class Messages
     return @last
   end
 
+  # Casts a vote for the last message
+  def vote(user_hash, value)
+    case value
+      when 1  then @last.upvote!
+      when -1 then @last.downvote!
+    end
+  end
+
   def dirty?
     return @dirty
   end

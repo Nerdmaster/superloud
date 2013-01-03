@@ -68,11 +68,11 @@ end
 
 # Votes the current message +1
 def upvote(e, params)
-  @messages.last.upvote!
+  @messages.vote(user_hash(e.msg), 1)
 end
 
 def downvote(e, params)
-  @messages.last.downvote!
+  @messages.vote(user_hash(e.msg), -1)
 end
 
 # Reports the last message's score
