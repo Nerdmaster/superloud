@@ -68,11 +68,11 @@ end
 
 # Votes the current message +1
 def upvote(e, params)
-  @messages.vote(user_hash(e.msg), 1)
+  @messages.vote(user_hash(e.msg), 1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
 end
 
 def downvote(e, params)
-  @messages.vote(user_hash(e.msg), -1)
+  @messages.vote(user_hash(e.msg), -1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
 end
 
 # Reports the last message's score
