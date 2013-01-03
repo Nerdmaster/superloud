@@ -1,6 +1,8 @@
 # THIS IS WHERE ALL OF MY COMMANDS LIVE PLEASE DO NOT CHANGE STUFF HERE UNLESS IT IS REALLY REALLY
 # A DIRECT PART OF COMMANDS OKAY
 
+require "digest"
+
 # Commands we support
 VALID_COMMANDS = [
   :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme, :refresh_ignores
@@ -159,7 +161,7 @@ end
 
 # Takes an event message and returns a semi-unique hash number representing the user + host
 def user_hash(message)
-  return message.user.hash + message.host.hash
+  return Digest::MD5.hexdigest(message.user).to_i(16) + Digest::MD5.hexdigest(message.host).to_i(16)
 end
 
 # Computes and seeds RNG with the given event's user hash combined with today's date and optional
