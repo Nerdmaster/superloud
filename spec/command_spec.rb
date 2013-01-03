@@ -193,4 +193,11 @@ describe "commands" do
       fair_dong_size.should eq(31)
     end
   end
+
+  describe "#user_hash" do
+    it "should return a set number on any platform" do
+      message = OpenStruct.new(:user => "nerdmaster", :host => "nerdbucket.com")
+      user_hash(message).should eq(333037843349749495676311809822862358690)
+    end
+  end
 end

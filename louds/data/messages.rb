@@ -22,6 +22,7 @@ class Messages
     @new_messages = []
     @changed_messages = []
     @last = nil
+    @voted = {}
   end
 
   # Populates the message structure so that random items can be produced
@@ -71,8 +72,27 @@ class Messages
   def random
     @random_messages = @messages.keys.shuffle if @random_messages.empty?
     @last = @messages[@random_messages.pop]
+    @voted.clear
 
     return @last
+  end
+
+  # Casts a vote for the last message if the given event's user hasn't already voted for it this
+  # time around.  Small databases can get crazy voting, but larger databases will be fine.
+  #
+  # TODO: If this is adjusted to disallow users for reasons other than having already voted, we
+  # need to pass something back to the caller because right now the message is very specific to
+  # duplicate voting.
+  def vote(user_hash, value)
+    return false if @voted[user_hash]
+
+    case value
+      when 1  then @last.upvote!
+      when -1 then @last.downvote!
+    end
+
+    @voted[user_hash] = true
+    return true
   end
 
   def dirty?
