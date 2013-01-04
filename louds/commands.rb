@@ -172,13 +172,21 @@ def user_seed(user_hash, add)
   srand(old_seed)
 end
 
+# Returns the penalty for the given number of rolls.  We want to encourage trying a second or third
+# time, but discourage rolling 5 or 10 times hoping for a lucky roll to balance out the penalty.
+def roll_penalty(count)
+  vals = [0, -1, -3, -6, -9, -12, -18, -24, -36, -48, -60, -72, -84, -96, -108]
+
+  return vals[count] || vals.last
+end
+
 # Computes size for a given event message.  Stores data into list of sizes for the day.
 def compute_size(e)
   user_hash = user_hash(e.msg)
   mulligans = @redongs[user_hash]
 
-  # -1 to size for each !REDONGME command
-  size_modifier = mulligans * -1
+  # Modify size by a semi-fibonacci value - more redongs means more and more loss
+  size_modifier = roll_penalty(mulligans)
 
   # Get size by using daily seed
   size = 0
