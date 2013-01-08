@@ -2,7 +2,7 @@ require "rubygems"
 require "rspec"
 require "ostruct"
 
-require File.dirname(__FILE__) + '/../utils/utils'
+require 'spec_helper'
 lib 'commands'
 
 describe "commands" do
