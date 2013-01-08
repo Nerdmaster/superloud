@@ -3,7 +3,7 @@ require "rspec"
 require "yaml"
 require "ostruct"
 
-require File.dirname(__FILE__) + '/../utils/utils'
+require 'spec_helper'
 lib 'loudbot', 'data/messages'
 
 describe "loudbot.rb" do
