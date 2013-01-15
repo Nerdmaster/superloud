@@ -1,9 +1,9 @@
-require "./data/messages/factory"
+lib "data/messages/factory"
 
 # Sets up one-time data when loudbot starts
 def init_data
   # Initialize message data object
-  @messages = Louds::Data::Messages::Factory.create("louds.db")
+  @messages = Louds::Data::Messages::Factory.create("db/louds.db")
   @messages.load
 
   @channel_list = []
@@ -13,7 +13,7 @@ def init_data
   @rps_contestant = {}
 
   # Set up master password
-  @password = FileTest.exist?("password.txt") ? IO.readlines("password.txt").first.strip : "chick3n"
+  @password = FileTest.exist?("config/password.txt") ? IO.readlines("config/password.txt").first.strip : "chick3n"
 
   # Load ignore list
   load_ignore_list
@@ -22,7 +22,7 @@ end
 # Loads the list of users to ignore
 def load_ignore_list
   @ignore_regexes = []
-  ignores = FileTest.exist?("ignores.txt") ? IO.readlines("ignores.txt") : []
+  ignores = FileTest.exist?("config/ignores.txt") ? IO.readlines("config/ignores.txt") : []
   for ignore in ignores
     @ignore_regexes.push Regexp.new(ignore.strip, Regexp::IGNORECASE)
   end

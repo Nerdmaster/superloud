@@ -1,6 +1,8 @@
 require "rubygems"
 require "rspec"
-require File.dirname(__FILE__) + '/../data/messages'
+
+require File.dirname(__FILE__) + '/../utils/utils'
+lib 'data/messages'
 
 describe "Messages" do
   before(:each) do
@@ -14,6 +16,7 @@ describe "Messages" do
     # Alias private data for easier testing
     @rnd = @messages.instance_variable_get("@random_messages")
     @msg = @messages.instance_variable_get("@messages")
+    @voted = @messages.instance_variable_get("@voted")
   end
 
   describe "#load" do
@@ -43,6 +46,77 @@ describe "Messages" do
       @msg.keys.should_receive(:shuffle).once.and_return(["new stuff", "more new stuff"])
 
       @messages.random
+    end
+
+    it "should clear the list of voters" do
+      @voted.should_receive(:clear).once
+      @messages.random
+    end
+  end
+
+  describe "#vote" do
+    before(:each) do
+      @last = double("Last message")
+      @last.stub(:upvote!)
+      @last.stub(:downvote!)
+
+      @messages.instance_variable_set("@last", @last)
+      @user_hash = 8473126312457
+      @user_voted_hash = {@user_hash => true}
+      @voted.clear
+    end
+
+    context "(when the user hasn't voted)" do
+      it "should upvote on a vote of 1" do
+        @last.should_receive(:upvote!).once
+        @messages.vote(@user_hash, 1)
+      end
+
+      it "should downvote on a vote of -1" do
+        @last.should_receive(:downvote!).once
+        @messages.vote(@user_hash, -1)
+      end
+
+      it "shouldn't alter the score if the vote was anything but 1 or -1" do
+        @last.should_not_receive(:downvote!)
+        @last.should_not_receive(:upvote!)
+
+        @messages.vote(@user_hash, -2)
+        @messages.vote(@user_hash, 0)
+        @messages.vote(@user_hash, 2)
+      end
+
+      it "should mark the user as having voted" do
+        @voted.should eq({})
+        @messages.vote(@user_hash, 1)
+        @voted.should eq(@user_voted_hash)
+      end
+
+      it "should return true" do
+        @messages.vote(@user_hash, 1).should eq(true)
+      end
+    end
+
+    context "(when the user has already voted)" do
+      before(:each) do
+        @messages.vote(@user_hash, 1)
+        @voted.should eq(@user_voted_hash)
+      end
+
+      it "shouldn't alter the message score" do
+        @last.should_not_receive(:downvote!)
+        @last.should_not_receive(:upvote!)
+        @messages.vote(@user_hash, 1)
+      end
+
+      it "should still allow another person to vote" do
+        @last.should_receive(:downvote!)
+        @messages.vote(@user_hash + 1, -1)
+      end
+
+      it "should return false" do
+        @messages.vote(@user_hash, 1).should eq(false)
+      end
     end
   end
 end

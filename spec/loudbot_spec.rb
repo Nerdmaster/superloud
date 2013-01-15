@@ -2,8 +2,9 @@ require "rubygems"
 require "rspec"
 require "yaml"
 require "ostruct"
-require File.dirname(__FILE__) + '/../loudbot'
-require File.dirname(__FILE__) + '/../data/messages'
+
+require File.dirname(__FILE__) + '/../utils/utils'
+lib 'loudbot', 'data/messages'
 
 describe "loudbot.rb" do
   before(:each) do

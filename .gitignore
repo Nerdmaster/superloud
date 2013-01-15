@@ -1,3 +1,4 @@
 rps/rps.yml
-/ignores.txt
-/password.txt
+/config/ignores.txt
+/config/password.txt
+/db/louds.db
