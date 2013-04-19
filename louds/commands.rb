@@ -159,6 +159,10 @@ end
 
 # Mocks Rails and particularly DHH
 def omakase(e, params)
+    if params.empty?
+      params = ["SUPERLOUD"]
+    end
+
     tool = params.first.upcase
     if tool == "RAILS" || tool == "RUBY ON RAILS"
       response = "#{tool} IS OMAKASE TIMES INFINITY AND NOT AT ALL A PROJECT THAT'S SLOWLY TURNED INTO A NIGHTMARE OF SHITTY OPINIONATED NON-ARCHITECTURE"
