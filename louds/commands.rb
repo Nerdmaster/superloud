@@ -5,7 +5,8 @@ require "digest"
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme, :refresh_ignores
+  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
+  :refresh_ignores, :omakase
 ]
 
 # RPS stuff is complicated enough to centralize all functionality in here
@@ -114,6 +115,7 @@ def help(e, params)
     when "HELP" then      send.call "OH WOW YOU ARE SO META I AM SO IMPRESSED WE SHOULD GO HAVE SEX NOW"
     when "DONGME" then    send.call "!DONGME: SHOWS HOW MUCH OF A MAN YOU ARE"
     when "REDONGME" then  send.call "!REDONGME: LETS YOU TRY TO MAKE YOURSELF INTO MORE OF A MAN BUT WITH DANGER RISK!"
+    when "OMAKASE" then   send.call "!OMAKASE [TOOLNAME]: MAKES TOOLS REALLY GREAT INSTEAD OF GIANT PILES OF POORLY-ARCHITECTED BULLSHIT"
     else                  send.call "!#{params.first}: DOES SOMETHING AWESOME"
   end
 end
@@ -153,6 +155,17 @@ end
 def refresh_ignores(e, params)
   return unless params.first == @password
   load_ignore_list
+end
+
+# Mocks Rails and particularly DHH
+def omakase(e, params)
+    tool = params.first.upcase
+    if tool == "RAILS" || tool == "RUBY ON RAILS"
+      response = "#{tool} IS OMAKASE TIMES INFINITY AND NOT AT ALL A PROJECT THAT'S SLOWLY TURNED INTO A NIGHTMARE OF SHITTY OPINIONATED NON-ARCHITECTURE"
+    else
+      response = "#{tool} IS OMAKASE"
+    end
+    @irc.msg(e.channel || e.nick, response)
 end
 
 #####

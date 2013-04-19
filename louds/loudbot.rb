@@ -121,7 +121,6 @@ def incoming_message(e)
         @messages.add(:text => text, :author => e.nick)
     end
   end
-
 end
 
 # Pulls a random message from our messages array and sends it to the given channel
