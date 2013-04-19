@@ -10,11 +10,6 @@
 #     ruby bot_runner.rb --network irc.somewhere.org --channel "#bots"
 
 require 'rubygems'
-
-# Want a specific version of net/yail?  Try uncommenting this:
-# gem 'net-yail', '1.x.y'
-
-gem "net-yail", "1.6.0"
 require 'net/yail'
 require 'getopt/long'
 
