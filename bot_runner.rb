@@ -117,6 +117,20 @@ end
   end
 end
 
+# This is a magic filter that allows an optional *whitelist* of users to let
+# through in case you have classics abusing your system.  Note that this
+# requires a channel over which you have essentially complete control!
+@irc.hearing_msg do |e|
+  for regex in @whitelist_regexes
+    if e.msg.prefix =~ regex
+      return
+    end
+  end
+
+  # If we got here, no match was made, so the user is ignored
+  e.handled!
+end
+
 # Our first before-filter is declared last!  This is a bit confusing.  Maybe I'll change it.  Why
 # did I do this???  Anyway, this filter ignores messages from anybody whose nick + host match any
 # regex in ignores.txt.  Anything caught here is skipped prior to the above filters running.
