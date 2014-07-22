@@ -128,6 +128,7 @@ end
   end
 
   # If we got here, no match was made, so the user is ignored
+  @irc.log.debug "Ignoring message: #{e.msg.prefix} didn't match any regex"
   e.handled!
 end
 
@@ -141,6 +142,7 @@ end
 @irc.hearing_msg do |e|
   for regex in @ignore_regexes
     if e.msg.prefix =~ regex
+      @irc.log.debug "Ignoring message: #{e.msg.prefix} matched #{regex.inspect}"
       e.handled!
       break
     end
