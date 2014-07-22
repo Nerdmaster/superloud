@@ -121,15 +121,17 @@ end
 # through in case you have classics abusing your system.  Note that this
 # requires a channel over which you have essentially complete control!
 @irc.hearing_msg do |e|
+  good = @whitelist_regexes == []
   for regex in @whitelist_regexes
     if e.msg.prefix =~ regex
-      return
+      good = true
     end
   end
 
-  # If we got here, no match was made, so the user is ignored
-  @irc.log.debug "Ignoring message: #{e.msg.prefix} didn't match any regex"
-  e.handled!
+  if !good
+    @irc.log.debug "Ignoring message: #{e.msg.prefix} didn't match any regex"
+    e.handled!
+  end
 end
 
 # Our first before-filter is declared last!  This is a bit confusing.  Maybe I'll change it.  Why
