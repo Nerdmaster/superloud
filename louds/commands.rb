@@ -23,31 +23,17 @@ def biggestdong(e, params)
     return
   end
 
-  big_winner = Hash.new(0)
-  tielist = Array.new
-  for user_hash, data in @size_data
-    if big_winner[:size] < data[:size]
-      big_winner = data
-      tielist = [data[:nick]]
-    elsif (big_winner[:size] == data[:size])
-      tielist.push(data[:nick])
-    end
-  end
+  winners = rank_by_size.first
+  nametext = userlist_text(winners.collect {|user| user[:nick]}).upcase
+  size = winners.first[:size]
 
-  nick = big_winner[:nick]
-  cm = big_winner[:size] / 2.0
+  cm = size / 2.0
   inches = cm / 2.54
 
-  tielist.sort!
-  tie_text = case tielist.length
-    when 2 then tielist.join(" AND ")
-    else        tielist[0..-2].join(", ") + ", AND #{tielist.last}"
-  end
-
-  if (tielist.length <=1)
-    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH IS %0.1f INCHES (%0.1f CM)" % [inches, cm])
+  if (winners.length <=1)
+    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nametext}'S WHICH IS %0.1f INCHES (%0.1f CM)" % [inches, cm])
   else
-    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{tie_text.upcase}!  THEY'RE %s %0.1f INCHES (%0.1f CM)!!!1!!" % [(tielist.length == 2 ? "BOTH" : "ALL"), inches, cm])
+    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{nametext}!  THEY'RE %s %0.1f INCHES (%0.1f CM)!!!1!!" % [(winners.length == 2 ? "BOTH" : "ALL"), inches, cm])
   end
 end
 
@@ -210,6 +196,38 @@ def compute_size(e)
   @size_data[user_hash] = {:size => size, :nick => e.nick}
 
   return size
+end
+
+# Returns a hash of size => userdata
+def users_by_size
+  map = {}
+  for user in @size_data.values
+    size = user[:size]
+    map[size] ||= []
+    map[size].push(user)
+  end
+  return map
+end
+
+# Returns a list of usernames and sizes, sorted by size.  Each element in the
+# returned array is a hash containing an array of users and their size.
+def rank_by_size
+  ranked_users = []
+  for size in users_by_size.keys.sort.reverse
+    ranked_users.push(users_by_size[size])
+  end
+
+  return ranked_users
+end
+
+# Helper for displaying winner text ("NERDMASTER", "NERDMASTER AND JON", etc)
+def userlist_text(userlist)
+  userlist.sort!
+  case userlist.length
+    when 1 then return userlist.first
+    when 2 then return userlist.join(" AND ")
+    else        return userlist[0..-2].join(", ") + ", AND #{userlist.last}"
+  end
 end
 
 # Returns a value in 1/2cm units of a randomized, normalized dong length
