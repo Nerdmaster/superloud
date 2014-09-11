@@ -198,7 +198,7 @@ def compute_size(e)
   user_hash = user_hash(e.msg)
   mulligans = @redongs[user_hash]
 
-  # Modify size by a semi-fibonacci value - more redongs means more and more loss
+  # Modify size by an increasing value - more redongs means more and more loss
   size_modifier = roll_penalty(mulligans)
 
   # Get size by using daily seed
