@@ -168,6 +168,22 @@ describe "commands" do
     end
   end
 
+  describe "#dongrank" do
+    it "should properly display rankings" do
+      @size_data = {
+        :xyzzy => {:size => 5, :nick => "loser"},
+        :fuzzy => {:size => 5, :nick => "loser 2"},
+        :one => {:size => 5, :nick => "loser 3"},
+        :two => {:size => 6, :nick => "Nerdmaster"},
+        :three => {:size => 6, :nick => "DialBOT"},
+        :four => {:size => 6, :nick => "Hal"},
+        :five => {:size => 7, :nick => "somedude"}
+      }
+      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER")
+      dongrank(@event, [])
+    end
+  end
+
   describe "#fair_dong_size" do
     # Okay, seriously I'm not one to test that data is *exactly* a certain value for a certain
     # input - that can get very tedious and not really help the suite.  But here, I find it is

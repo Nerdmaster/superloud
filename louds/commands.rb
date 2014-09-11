@@ -5,7 +5,7 @@ require "digest"
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
+  :dongrank, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
   :refresh_ignores, :omakase
 ]
 
@@ -96,6 +96,7 @@ def help(e, params)
   end
 
   case params.first
+    when "DONGRANK" then  send.call "!DONGRANK: SHOW THE PEOPLE WHO FUCKING MATTER"
     when "SIZE" then      send.call "!SIZE [USERNAME]: GIVES YOU THE ONLY THING THAT MATTERS ABOUT SOMEBODY: SIZE"
     when "SIZEME" then    send.call "!SIZEME: TELLS YOU IF YOU ARE WORTH ANYTHING TO SOCIETY"
     when "HELP" then      send.call "OH WOW YOU ARE SO META I AM SO IMPRESSED WE SHOULD GO HAVE SEX NOW"
@@ -135,6 +136,25 @@ end
 # Reports users's current dong size
 def sizeme(e, params)
   size(e, [e.nick])
+end
+
+def dongrank(e, params)
+  winners_list = rank_by_size
+  place = ["FIRST", "SECOND"]
+
+  output = []
+  index = 0
+  for winners in winners_list[0..1]
+    nametext = userlist_text(winners.collect {|user| user[:nick]}).upcase
+    size = winners.first[:size]
+    cm = size / 2.0
+    inches = cm / 2.54
+
+    output.push "IN #{place[index]} PLACE WE HAVE #{nametext}"
+    index += 1
+  end
+
+  @irc.msg(e.channel || e.nick, output.join("; "))
 end
 
 # Reloads the ignores list if the appropriate credentials are used
