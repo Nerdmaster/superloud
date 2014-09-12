@@ -96,7 +96,9 @@ def help(e, params)
   end
 
   case params.first
-    when "DONGRANK" then  send.call "!DONGRANK: SHOW THE PEOPLE WHO FUCKING MATTER"
+    when "DONGRANK" then  send.call "!DONGRANK [NUMBER]: SHOW THE PEOPLE WHO " +
+                                    "FUCKING MATTER, BY DEFAULT DOES THE " +
+                                    "TOP 3 FOR THE DAY... JUST LIKE YERMOM"
     when "SIZE" then      send.call "!SIZE [USERNAME]: GIVES YOU THE ONLY THING THAT MATTERS ABOUT SOMEBODY: SIZE"
     when "SIZEME" then    send.call "!SIZEME: TELLS YOU IF YOU ARE WORTH ANYTHING TO SOCIETY"
     when "HELP" then      send.call "OH WOW YOU ARE SO META I AM SO IMPRESSED WE SHOULD GO HAVE SEX NOW"
@@ -140,11 +142,13 @@ end
 
 def dongrank(e, params)
   winners_list = rank_by_size
-  place = ["FIRST", "SECOND"]
+  places = params.first.to_i
+  places = 3 if places > 10 || places < 2
+  place = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"]
 
   output = []
   index = 0
-  for winners in winners_list[0..1]
+  for winners in winners_list[0..places-1]
     nametext = userlist_text(winners.collect {|user| user[:nick]}).upcase
     size = winners.first[:size]
     cm = size / 2.0
