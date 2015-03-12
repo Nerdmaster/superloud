@@ -5,9 +5,11 @@ require "digest"
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongwinners, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
+  :dongwinners, :dongrankme, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
   :refresh_ignores, :omakase
 ]
+
+PLACES = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"]
 
 # RPS stuff is complicated enough to centralize all functionality in here
 lib "rps/rps_command"
@@ -99,6 +101,7 @@ def help(e, params)
     when "DONGWINNERS" then send.call "!DONGWINNERS [NUMBER]: SHOW THE PEOPLE WHO " +
                                       "FUCKING MATTER, BY DEFAULT DOES THE " +
                                       "TOP 2 FOR THE DAY... JUST LIKE A SLOW NIGHT FOR YERMOM"
+    when "DONGRANKME" then send.call "!DONGRANKME: SHOW YOUR RELATIVE WORTH"
     when "SIZE" then      send.call "!SIZE [USERNAME]: GIVES YOU THE ONLY THING THAT MATTERS ABOUT SOMEBODY: SIZE"
     when "SIZEME" then    send.call "!SIZEME: TELLS YOU IF YOU ARE WORTH ANYTHING TO SOCIETY"
     when "HELP" then      send.call "OH WOW YOU ARE SO META I AM SO IMPRESSED WE SHOULD GO HAVE SEX NOW"
@@ -140,11 +143,22 @@ def sizeme(e, params)
   size(e, [e.nick])
 end
 
+def dongrankme(e, params)
+  uhash = user_hash(e.msg)
+  user_size_data = @size_data[uhash]
+  if !user_size_data
+    @irc.msg(e.channel || e.nick, "YOU DON'T HAVE A DONG DUMBASS")
+    return
+  end
+
+  rank = size_to_rank(user_size_data[:size])
+  @irc.msg(e.channel || e.nick, "YOU ARE CURRENTLY RANKED %s!" % placetext(rank))
+end
+
 def dongwinners(e, params)
   winners_list = rank_by_size
   places = params.first.to_i
   places = 2 if places > 10 || places < 2
-  place = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"]
 
   output = []
   index = 0
@@ -154,7 +168,7 @@ def dongwinners(e, params)
     cm = size / 2.0
     inches = cm / 2.54
 
-    output.push "IN #{place[index]} PLACE WE HAVE #{nametext}"
+    output.push "IN #{PLACES[index]} PLACE WE HAVE #{nametext}"
     index += 1
   end
 
@@ -217,7 +231,7 @@ def compute_size(e)
     size = [2, fair_dong_size + size_modifier].max
   end
 
-  @size_data[user_hash] = {:size => size, :nick => e.nick}
+  @size_data[user_hash] = {:size => size, :nick => e.nick, :hash => user_hash}
 
   return size
 end
@@ -231,6 +245,21 @@ def users_by_size
     map[size].push(user)
   end
   return map
+end
+
+def placetext(place)
+  ptext = PLACES[place - 1]
+  return ptext || "NUMBER #{place.to_i}"
+end
+
+# Returns a hash of size => rank
+def size_to_rank(size)
+  rank = 1
+  map = {}
+  for mapped_size in users_by_size.keys.sort.reverse
+    return rank if size == mapped_size
+    rank += 1
+  end
 end
 
 # Returns a list of usernames and sizes, sorted by size.  Each element in the
