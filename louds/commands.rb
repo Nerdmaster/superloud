@@ -5,7 +5,7 @@ require "digest"
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongrank, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
+  :dongwinners, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
   :refresh_ignores, :omakase
 ]
 
@@ -96,9 +96,9 @@ def help(e, params)
   end
 
   case params.first
-    when "DONGRANK" then  send.call "!DONGRANK [NUMBER]: SHOW THE PEOPLE WHO " +
-                                    "FUCKING MATTER, BY DEFAULT DOES THE " +
-                                    "TOP 3 FOR THE DAY... JUST LIKE YERMOM"
+    when "DONGWINNERS" then send.call "!DONGWINNERS [NUMBER]: SHOW THE PEOPLE WHO " +
+                                      "FUCKING MATTER, BY DEFAULT DOES THE " +
+                                      "TOP 2 FOR THE DAY... JUST LIKE A SLOW NIGHT FOR YERMOM"
     when "SIZE" then      send.call "!SIZE [USERNAME]: GIVES YOU THE ONLY THING THAT MATTERS ABOUT SOMEBODY: SIZE"
     when "SIZEME" then    send.call "!SIZEME: TELLS YOU IF YOU ARE WORTH ANYTHING TO SOCIETY"
     when "HELP" then      send.call "OH WOW YOU ARE SO META I AM SO IMPRESSED WE SHOULD GO HAVE SEX NOW"
@@ -140,10 +140,10 @@ def sizeme(e, params)
   size(e, [e.nick])
 end
 
-def dongrank(e, params)
+def dongwinners(e, params)
   winners_list = rank_by_size
   places = params.first.to_i
-  places = 3 if places > 10 || places < 2
+  places = 2 if places > 10 || places < 2
   place = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"]
 
   output = []

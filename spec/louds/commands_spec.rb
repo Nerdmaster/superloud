@@ -168,7 +168,7 @@ describe "commands" do
     end
   end
 
-  describe "#dongrank" do
+  describe "#dongwinners" do
     before(:each) do
       @size_data = {
         :xyzzy => {:size => 5, :nick => "loser"},
@@ -181,17 +181,17 @@ describe "commands" do
       }
     end
 
-    it "should properly display the top three rankings" do
-      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER; IN THIRD PLACE WE HAVE LOSER")
-      dongrank(@event, [])
+    it "should properly display the top two rankings" do
+      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER")
+      dongwinners(@event, [])
     end
 
     it "should show the top X with a parameter" do
-      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER")
-      dongrank(@event, ["2"])
+      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER; IN THIRD PLACE WE HAVE LOSER")
+      dongwinners(@event, ["3"])
 
-      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER; IN THIRD PLACE WE HAVE LOSER; IN FOURTH PLACE WE HAVE LOSER 2")
-      dongrank(@event, ["4"])
+      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER; IN THIRD PLACE WE HAVE LOSER; IN FOURTH PLACE WE HAVE LOSER 2; IN FIFTH PLACE WE HAVE LOSER 3")
+      dongwinners(@event, ["7"])
     end
   end
 
