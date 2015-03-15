@@ -5,8 +5,11 @@ require "digest"
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme, :refresh_ignores
+  :dongwinners, :dongrankme, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
+  :refresh_ignores, :omakase
 ]
+
+PLACES = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"]
 
 # RPS stuff is complicated enough to centralize all functionality in here
 lib "rps/rps_command"
@@ -22,31 +25,17 @@ def biggestdong(e, params)
     return
   end
 
-  big_winner = Hash.new(0)
-  tielist = Array.new
-  for user_hash, data in @size_data
-    if big_winner[:size] < data[:size]
-      big_winner = data
-      tielist = [data[:nick]]
-    elsif (big_winner[:size] == data[:size])
-      tielist.push(data[:nick])
-    end
-  end
+  winners = rank_by_size.first
+  nametext = userlist_text(winners.collect {|user| user[:nick]}).upcase
+  size = winners.first[:size]
 
-  nick = big_winner[:nick]
-  cm = big_winner[:size] / 2.0
+  cm = size / 2.0
   inches = cm / 2.54
 
-  tielist.sort!
-  tie_text = case tielist.length
-    when 2 then tielist.join(" AND ")
-    else        tielist[0..-2].join(", ") + ", AND #{tielist.last}"
-  end
-
-  if (tielist.length <=1)
-    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nick.upcase}'S WHICH IS %0.1f INCHES (%0.1f CM)" % [inches, cm])
+  if (winners.length <=1)
+    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS #{nametext}'S WHICH IS %0.1f INCHES (%0.1f CM)" % [inches, cm])
   else
-    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{tie_text.upcase}!  THEY'RE %s %0.1f INCHES (%0.1f CM)!!!1!!" % [(tielist.length == 2 ? "BOTH" : "ALL"), inches, cm])
+    @irc.msg(e.channel || e.nick, "THE BIGGEST I'VE SEEN TODAY IS... OMFG... IT'S A TIE BETWEEN #{nametext}!  THEY'RE %s %0.1f INCHES (%0.1f CM)!!!1!!" % [(winners.length == 2 ? "BOTH" : "ALL"), inches, cm])
   end
 end
 
@@ -109,11 +98,16 @@ def help(e, params)
   end
 
   case params.first
+    when "DONGWINNERS" then send.call "!DONGWINNERS [NUMBER]: SHOW THE PEOPLE WHO " +
+                                      "FUCKING MATTER, BY DEFAULT DOES THE " +
+                                      "TOP 2 FOR THE DAY... JUST LIKE A SLOW NIGHT FOR YERMOM"
+    when "DONGRANKME" then send.call "!DONGRANKME: SHOW YOUR RELATIVE WORTH"
     when "SIZE" then      send.call "!SIZE [USERNAME]: GIVES YOU THE ONLY THING THAT MATTERS ABOUT SOMEBODY: SIZE"
     when "SIZEME" then    send.call "!SIZEME: TELLS YOU IF YOU ARE WORTH ANYTHING TO SOCIETY"
     when "HELP" then      send.call "OH WOW YOU ARE SO META I AM SO IMPRESSED WE SHOULD GO HAVE SEX NOW"
     when "DONGME" then    send.call "!DONGME: SHOWS HOW MUCH OF A MAN YOU ARE"
     when "REDONGME" then  send.call "!REDONGME: LETS YOU TRY TO MAKE YOURSELF INTO MORE OF A MAN BUT WITH DANGER RISK!"
+    when "OMAKASE" then   send.call "!OMAKASE [TOOLNAME]: MAKES TOOLS REALLY GREAT INSTEAD OF GIANT PILES OF POORLY-ARCHITECTED BULLSHIT"
     else                  send.call "!#{params.first}: DOES SOMETHING AWESOME"
   end
 end
@@ -149,10 +143,53 @@ def sizeme(e, params)
   size(e, [e.nick])
 end
 
+def dongrankme(e, params)
+  uhash = user_hash(e.msg)
+  user_size_data = @size_data[uhash]
+  if !user_size_data
+    @irc.msg(e.channel || e.nick, "YOU DON'T HAVE A DONG DUMBASS")
+    return
+  end
+
+  rank = size_to_rank(user_size_data[:size])
+  @irc.msg(e.channel || e.nick, "YOU ARE CURRENTLY RANKED %s!" % placetext(rank))
+end
+
+def dongwinners(e, params)
+  winners_list = rank_by_size
+  places = params.first.to_i
+  places = 2 if places > 10 || places < 2
+
+  output = []
+  index = 0
+  for winners in winners_list[0..places-1]
+    nametext = userlist_text(winners.collect {|user| user[:nick]}).upcase
+    size = winners.first[:size]
+    cm = size / 2.0
+    inches = cm / 2.54
+
+    output.push "IN #{PLACES[index]} PLACE WE HAVE #{nametext}"
+    index += 1
+  end
+
+  @irc.msg(e.channel || e.nick, output.join("; "))
+end
+
 # Reloads the ignores list if the appropriate credentials are used
 def refresh_ignores(e, params)
   return unless params.first == @password
   load_ignore_list
+end
+
+# Mocks Rails and particularly DHH
+def omakase(e, params)
+    tool = params.empty? ? "SUPERLOUD" : params.join(" ").upcase
+    if tool == "RAILS" || tool == "RUBY ON RAILS"
+      response = "#{tool} IS OMAKASE TIMES INFINITY AND NOT AT ALL A PROJECT THAT'S SLOWLY TURNED INTO A NIGHTMARE OF SHITTY OPINIONATED NON-ARCHITECTURE"
+    else
+      response = "#{tool} IS OMAKASE"
+    end
+    @irc.msg(e.channel || e.nick, response)
 end
 
 #####
@@ -172,13 +209,21 @@ def user_seed(user_hash, add)
   srand(old_seed)
 end
 
+# Returns the penalty for the given number of rolls.  We want to encourage trying a second or third
+# time, but discourage rolling 5 or 10 times hoping for a lucky roll to balance out the penalty.
+def roll_penalty(count)
+  vals = [0, -1, -3, -6, -9, -12, -18, -24, -36, -48, -60, -72, -84, -96, -108]
+
+  return vals[count] || vals.last
+end
+
 # Computes size for a given event message.  Stores data into list of sizes for the day.
 def compute_size(e)
   user_hash = user_hash(e.msg)
   mulligans = @redongs[user_hash]
 
-  # -1 to size for each !REDONGME command
-  size_modifier = mulligans * -1
+  # Modify size by an increasing value - more redongs means more and more loss
+  size_modifier = roll_penalty(mulligans)
 
   # Get size by using daily seed
   size = 0
@@ -186,9 +231,56 @@ def compute_size(e)
     size = [2, fair_dong_size + size_modifier].max
   end
 
-  @size_data[user_hash] = {:size => size, :nick => e.nick}
+  @size_data[user_hash] = {:size => size, :nick => e.nick, :hash => user_hash}
 
   return size
+end
+
+# Returns a hash of size => userdata
+def users_by_size
+  map = {}
+  for user in @size_data.values
+    size = user[:size]
+    map[size] ||= []
+    map[size].push(user)
+  end
+  return map
+end
+
+def placetext(place)
+  ptext = PLACES[place - 1]
+  return ptext || "NUMBER #{place.to_i}"
+end
+
+# Returns a hash of size => rank
+def size_to_rank(size)
+  rank = 1
+  map = {}
+  for mapped_size in users_by_size.keys.sort.reverse
+    return rank if size == mapped_size
+    rank += 1
+  end
+end
+
+# Returns a list of usernames and sizes, sorted by size.  Each element in the
+# returned array is a hash containing an array of users and their size.
+def rank_by_size
+  ranked_users = []
+  for size in users_by_size.keys.sort.reverse
+    ranked_users.push(users_by_size[size])
+  end
+
+  return ranked_users
+end
+
+# Helper for displaying winner text ("NERDMASTER", "NERDMASTER AND JON", etc)
+def userlist_text(userlist)
+  userlist.sort!
+  case userlist.length
+    when 1 then return userlist.first
+    when 2 then return userlist.join(" AND ")
+    else        return userlist[0..-2].join(", ") + ", AND #{userlist.last}"
+  end
 end
 
 # Returns a value in 1/2cm units of a randomized, normalized dong length

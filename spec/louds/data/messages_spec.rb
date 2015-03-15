@@ -1,7 +1,7 @@
 require "rubygems"
 require "rspec"
 
-require File.dirname(__FILE__) + '/../utils/utils'
+require 'spec_helper'
 lib 'data/messages'
 
 describe "Messages" do

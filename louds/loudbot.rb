@@ -19,12 +19,20 @@ def init_data
   load_ignore_list
 end
 
-# Loads the list of users to ignore
+# Loads the list of users to ignore and users that are whitelisted - typically
+# only one should exist
 def load_ignore_list
   @ignore_regexes = []
+  @whitelist_regexes = []
+
   ignores = FileTest.exist?("config/ignores.txt") ? IO.readlines("config/ignores.txt") : []
   for ignore in ignores
     @ignore_regexes.push Regexp.new(ignore.strip, Regexp::IGNORECASE)
+  end
+
+  allowedlist = FileTest.exist?("config/whitelist.txt") ? IO.readlines("config/whitelist.txt") : []
+  for allowed in allowedlist
+    @whitelist_regexes.push Regexp.new(allowed.strip, Regexp::IGNORECASE)
   end
 end
 
@@ -121,7 +129,6 @@ def incoming_message(e)
         @messages.add(:text => text, :author => e.nick)
     end
   end
-
 end
 
 # Pulls a random message from our messages array and sends it to the given channel

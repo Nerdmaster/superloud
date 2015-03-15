@@ -2,7 +2,7 @@ require "rubygems"
 require "rspec"
 require "ostruct"
 
-require File.dirname(__FILE__) + '/../utils/utils'
+require 'spec_helper'
 lib 'commands'
 
 describe "commands" do
@@ -165,6 +165,66 @@ describe "commands" do
       }
       @irc.should_receive(:msg).with("#ngs", /DIALBOT, HAL, NERDMASTER, AND PIZZA/)
       biggestdong(@event, [])
+    end
+  end
+
+  describe "#dongwinners" do
+    before(:each) do
+      @size_data = {
+        :xyzzy => {:size => 5, :nick => "loser"},
+        :fuzzy => {:size => 4, :nick => "loser 2"},
+        :one => {:size => 3, :nick => "loser 3"},
+        :two => {:size => 6, :nick => "Nerdmaster"},
+        :three => {:size => 6, :nick => "DialBOT"},
+        :four => {:size => 6, :nick => "Hal"},
+        :five => {:size => 7, :nick => "somedude"}
+      }
+    end
+
+    it "should properly display the top two rankings" do
+      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER")
+      dongwinners(@event, [])
+    end
+
+    it "should show the top X with a parameter" do
+      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER; IN THIRD PLACE WE HAVE LOSER")
+      dongwinners(@event, ["3"])
+
+      @irc.should_receive(:msg).with("#ngs", "IN FIRST PLACE WE HAVE SOMEDUDE; IN SECOND PLACE WE HAVE DIALBOT, HAL, AND NERDMASTER; IN THIRD PLACE WE HAVE LOSER; IN FOURTH PLACE WE HAVE LOSER 2; IN FIFTH PLACE WE HAVE LOSER 3")
+      dongwinners(@event, ["7"])
+    end
+  end
+
+  describe "#dongrankme" do
+    before(:each) do
+      @size_data = {
+        :xyzzy => {:size => 5, :nick => "loser"},
+        :fuzzy => {:size => 4, :nick => "loser 2"},
+        :one => {:size => 3, :nick => "loser 3"},
+        :two => {:size => 6, :nick => "Nerdmaster"},
+        :three => {:size => 6, :nick => "DialBOT"},
+        :four => {:size => 6, :nick => "Hal"},
+        :five => {:size => 7, :nick => "somedude"}
+      }
+      @message = OpenStruct.new(:user => "user", :host => "host")
+      allow(@event).to receive(:msg).and_return(@message)
+    end
+
+    it "should let me know if I haven't got data" do
+      expect(@irc).to receive(:msg).with("#ngs", /YOU DON'T HAVE A DONG/)
+      dongrankme(@event, nil)
+    end
+
+    it "should return the right ranking text for first place" do
+      allow(self).to receive(:user_hash).and_return(:five)
+      expect(@irc).to receive(:msg).with("#ngs", /YOU ARE CURRENTLY RANKED FIRST!/)
+      dongrankme(@event, nil)
+    end
+
+    it "should return the right ranking text for fifth" do
+      allow(self).to receive(:user_hash).and_return(:one)
+      expect(@irc).to receive(:msg).with("#ngs", /YOU ARE CURRENTLY RANKED FIFTH!/)
+      dongrankme(@event, nil)
     end
   end
 

@@ -52,6 +52,10 @@ class Messages::SQLite < Messages
 
   # Returns true if the item exists anywhere in our database
   def exists?(text)
+    # First look for the item in memory
+    return true if @messages[text]
+
+    # If not in memory, since we don't always load everything, we have to check the db
     results = @db.execute("SELECT id FROM messages WHERE text = ?", text)
     return results.length > 0
   end
