@@ -34,7 +34,8 @@ opt = Getopt::Long.getopts(
   ['--channel', Getopt::REQUIRED],
   ['--nick', Getopt::REQUIRED],
   ['--port', Getopt::REQUIRED],
-  ['--debug', Getopt::BOOLEAN]
+  ['--debug', Getopt::BOOLEAN],
+  ['--ssl', Getopt::BOOLEAN]
 )
 
 # Create bot object
@@ -43,7 +44,8 @@ opt = Getopt::Long.getopts(
   :username   => '2LOUD4U',
   :realname   => 'John Botfrakker',
   :port       => opt["port"],
-  :nicknames  => [opt['nick'] || "SUPERLOUD"]
+  :nicknames  => [opt['nick'] || "SUPERLOUD"],
+  :use_ssl    => opt["ssl"]
 )
 
 # If --debug is passed on the command line, we spew lots of filth at the user
