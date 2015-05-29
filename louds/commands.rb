@@ -222,6 +222,11 @@ def compute_size(e)
   user_hash = user_hash(e.msg)
   mulligans = @redongs[user_hash]
 
+  if !@ssl_users[e.msg.nick]
+    @irc.log.debug "+2 redong penalty for non-ssl users"
+    mulligans += 2
+  end
+
   # Modify size by an increasing value - more redongs means more and more loss
   size_modifier = roll_penalty(mulligans)
 
