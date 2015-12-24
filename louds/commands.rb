@@ -5,7 +5,7 @@ require "digest"
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongwinners, :dongrankme, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
+  :dongwinners, :dwall, :dongrankme, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
   :refresh_ignores, :omakase
 ]
 
@@ -98,6 +98,7 @@ def help(e, params)
   end
 
   case params.first
+    when "DWALL" then send.call "!DWALL: SHOW EVERYBODY'S RANK, EVEN THE WORTHLESS FOLK"
     when "DONGWINNERS" then send.call "!DONGWINNERS [NUMBER]: SHOW THE PEOPLE WHO " +
                                       "FUCKING MATTER, BY DEFAULT DOES THE " +
                                       "TOP 2 FOR THE DAY... JUST LIKE A SLOW NIGHT FOR YERMOM"
@@ -153,6 +154,10 @@ def dongrankme(e, params)
 
   rank = size_to_rank(user_size_data[:size])
   @irc.msg(e.channel || e.nick, "YOU ARE CURRENTLY RANKED %s!" % placetext(rank))
+end
+
+def dwall(e, params)
+  dongwinners(e, [10])
 end
 
 def dongwinners(e, params)
