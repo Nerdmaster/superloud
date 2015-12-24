@@ -6,10 +6,10 @@ module Data
 
 class Messages::SQLite < Messages
   # We expect to pull at least this many messages from sqlite
-  MINIMUM_RETRIEVAL_SIZE = 1000
+  MINIMUM_RETRIEVAL_SIZE = 100
 
-  # We limit our query to no more than 10x the minimum set
-  MAXIMUM_RETRIEVAL_SIZE = MINIMUM_RETRIEVAL_SIZE * 10
+  # We limit our query to no more than 100x the minimum set
+  MAXIMUM_RETRIEVAL_SIZE = MINIMUM_RETRIEVAL_SIZE * 100
 
   def initialize(filename)
     # TODO: Figure out a smarter way to test for the messages table
