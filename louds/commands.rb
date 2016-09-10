@@ -238,7 +238,12 @@ def compute_size(e)
   # Get size by using daily seed
   size = 0
   user_seed(user_hash, mulligans * 53) do
-    size = [2, fair_dong_size + size_modifier].max
+    # Is it MICROPENIS MONDAY?!?
+    if Time.now.wday == 1
+      size = [2, microdong_size + size_modifier].max
+    else
+      size = [2, fair_dong_size + size_modifier].max
+    end
   end
 
   @size_data[user_hash] = {:size => size, :nick => e.nick, :hash => user_hash}
@@ -291,6 +296,17 @@ def userlist_text(userlist)
     when 2 then return userlist.join(" AND ")
     else        return userlist[0..-2].join(", ") + ", AND #{userlist.last}"
   end
+end
+
+# Returns a value in 1/2cm units of a randomized, normalized microdong length.
+# This is a simplified copy of the normal code except that we roll 3d5 instead
+# of 3d15.  This makes the average around 1/2 normal, while the maximum is
+# about 1/3rd the normal maximum.
+def microdong_size
+  average = 28
+  roll = Dice.roll(3, 5) - 22
+  percent = (100 + roll * 3) / 100.0
+  return (percent * average).to_i
 end
 
 # Returns a value in 1/2cm units of a randomized, normalized dong length
