@@ -87,6 +87,9 @@ def is_it_loud?(text, &block)
   # What about letters per word?!?
   errors.push("words are too small") if (words.count > 0) && (letters.count / words.count < 3.0)
 
+  # No non-louds!  A sentence isn't loud IF IT ENDS WITH A PERIOD!
+  errors.push("friggin' periods") if text =~ /\.$/
+
   unless errors.empty?
     yield(:rejected, errors.join(", "))
     return
