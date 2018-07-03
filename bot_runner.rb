@@ -96,7 +96,8 @@ end
 
 @irc.heard_statsdline do |e|
   nick = e.msg.params[1].sub(/^%/, "").sub(/^@/, "")
-  if e.msg.params[2] =~ /is connected via SSL/
+  txt = e.msg.params[2]
+  if txt =~ /is connected via SSL/ || txt =~ /is using a secure connection/
     @ssl_users[nick] = true
     @irc.log.debug("Setting #{nick} as an SSL user")
   end
