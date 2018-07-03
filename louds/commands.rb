@@ -5,8 +5,9 @@ require "digest"
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongwinners, :dwall, :dongrankme, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
-  :refresh_ignores, :omakase
+  :dongwinners, :dwall, :dongrankme, :dongme, :redongme, :upvote, :downvote,
+  :score, :help, :rps, :biggestdong, :size, :sizeme, :refresh_ignores,
+  :refresh_aliases, :omakase
 ]
 
 PLACES = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"]
@@ -46,10 +47,10 @@ end
 # Increments rerolls and sends inappropriate imagery
 def redongme(e, params)
   # Clear old size data for this user
-  @size_data[user_hash(e.msg)] = Hash.new(0)
+  @size_data[user_hash(@message)] = Hash.new(0)
 
   # Increment mulligan count
-  @redongs[user_hash(e.msg)] += 1
+  @redongs[user_hash(@message)] += 1
 
   # Send a BRAND NEW DONG!!!
   send_dong(e)
@@ -57,11 +58,11 @@ end
 
 # Votes the current message +1
 def upvote(e, params)
-  @messages.vote(user_hash(e.msg), 1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
+  @messages.vote(user_hash(@message), 1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
 end
 
 def downvote(e, params)
-  @messages.vote(user_hash(e.msg), -1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
+  @messages.vote(user_hash(@message), -1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
 end
 
 # Reports the last message's score
@@ -128,7 +129,7 @@ def size(e, params)
     if datanick == name
      cm = data[:size] / 2.0
      inches = cm / 2.54
-     fmt = name == e.nick.upcase ? "HEY %s YOUR DONG IS" : "%s'S DONG IS"
+     fmt = name == @message.nick.upcase ? "HEY %s YOUR DONG IS" : "%s'S DONG IS"
      msg = "#{fmt} %0.1f INCHES (%0.1f CM)" % [name, inches, cm]
      break
     end
@@ -141,11 +142,11 @@ end
 
 # Reports users's current dong size
 def sizeme(e, params)
-  size(e, [e.nick])
+  size(e, [@message.nick])
 end
 
 def dongrankme(e, params)
-  uhash = user_hash(e.msg)
+  uhash = user_hash(@message)
   user_size_data = @size_data[uhash]
   if !user_size_data
     @irc.msg(e.channel || e.nick, "YOU DON'T HAVE A DONG DUMBASS")
@@ -186,6 +187,12 @@ def refresh_ignores(e, params)
   load_ignore_list
 end
 
+# Reloads the alias list
+def refresh_aliases(e, params)
+  return unless params.first == @password
+  load_aliases
+end
+
 # Mocks Rails and particularly DHH
 def omakase(e, params)
     tool = params.empty? ? "SUPERLOUD" : params.join(" ").upcase
@@ -224,7 +231,7 @@ end
 
 # Computes size for a given event message.  Stores data into list of sizes for the day.
 def compute_size(e)
-  user_hash = user_hash(e.msg)
+  user_hash = user_hash(@message)
   mulligans = @redongs[user_hash]
 
   if !@ssl_users[e.msg.nick]
@@ -246,7 +253,7 @@ def compute_size(e)
     end
   end
 
-  @size_data[user_hash] = {:size => size, :nick => e.nick, :hash => user_hash}
+  @size_data[user_hash] = {:size => size, :nick => @message.nick, :hash => user_hash}
 
   return size
 end

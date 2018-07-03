@@ -17,6 +17,9 @@ def init_data
 
   # Load ignore list
   load_ignore_list
+
+  # Load aliases so people stop FUCKING CHEATING
+  load_aliases
 end
 
 # Loads the list of users to ignore and users that are whitelisted - typically
@@ -33,6 +36,16 @@ def load_ignore_list
   allowedlist = FileTest.exist?("config/whitelist.txt") ? IO.readlines("config/whitelist.txt") : []
   for allowed in allowedlist
     @whitelist_regexes.push Regexp.new(allowed.strip, Regexp::IGNORECASE)
+  end
+end
+
+# Loads the list of user aliases to reduce cheating
+def load_aliases
+  @aliases = YAML.load_file("config/aliases.yml")
+  @aliases["patterns"] = {}
+  for pattern,data in @aliases["aliases"]
+    regex = Regexp.new(pattern.strip, Regexp::IGNORECASE)
+    @aliases["patterns"][regex] = data
   end
 end
 
@@ -129,7 +142,7 @@ def incoming_message(e)
       when :loud
         @irc.log.debug "IT WAS LOUD!  #{text.inspect}"
         random_message(e.channel)
-        @messages.add(:text => text, :author => e.nick)
+        @messages.add(:text => text, :author => @message.nick)
     end
   end
 end

@@ -12,6 +12,7 @@
 require 'rubygems'
 require 'net/yail'
 require 'getopt/long'
+require 'ostruct'
 
 # Project-level includes all parts of the app expect - anything using classes in isolation should
 # require this file first!
@@ -146,6 +147,19 @@ end
   if e.message =~ /^#{@irc.me}/
     random_message(e.channel)
     e.handled!
+  end
+end
+
+# This filter does some horrible trickery to fake event data when an alias
+# regex matches the event.  This allows us to "dedupe" users who have multiple
+# handles / logins.
+@irc.hearing_msg do |e|
+  @message = OpenStruct.new(:nick => e.nick, :prefix => e.msg.prefix, :user => e.msg.user, :host => e.msg.host)
+  for regex,data in @aliases["patterns"]
+    if e.msg.prefix =~ regex
+      @irc.log.debug "Alias detected (#{regex.inspect})!"
+      @message = OpenStruct.new(data)
+    end
   end
 end
 
