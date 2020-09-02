@@ -73,7 +73,7 @@ def is_it_loud?(text, &block)
   # Rules are getting complex - let's handle them one at a time
   errors.push("too short") if len < 11
   errors.push("too low uppercase ratio") if uppercase_count < len * 0.60
-  errors.push("shut up") if (text =~ /retard/ || text =~ /reetard/)
+  errors.push("shut up") if text =~ /re+tard/i
 
   # If there are any errors, the text is bad and nothing else needs to happen
   unless errors.empty?
