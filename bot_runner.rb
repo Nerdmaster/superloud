@@ -12,6 +12,7 @@
 require 'rubygems'
 require 'net/yail'
 require 'getopt/long'
+require 'ostruct'
 
 # Project-level includes all parts of the app expect - anything using classes in isolation should
 # require this file first!
@@ -34,7 +35,8 @@ opt = Getopt::Long.getopts(
   ['--channel', Getopt::REQUIRED],
   ['--nick', Getopt::REQUIRED],
   ['--port', Getopt::REQUIRED],
-  ['--debug', Getopt::BOOLEAN]
+  ['--debug', Getopt::BOOLEAN],
+  ['--ssl', Getopt::BOOLEAN]
 )
 
 # Create bot object
@@ -43,8 +45,11 @@ opt = Getopt::Long.getopts(
   :username   => '2LOUD4U',
   :realname   => 'John Botfrakker',
   :port       => opt["port"],
-  :nicknames  => [opt['nick'] || "SUPERLOUD"]
+  :nicknames  => [opt['nick'] || "SUPERLOUD"],
+  :use_ssl    => opt["ssl"]
 )
+
+@ssl_users = Hash.new
 
 # If --debug is passed on the command line, we spew lots of filth at the user
 @irc.log.level = Logger::DEBUG if opt['debug']
@@ -76,6 +81,31 @@ init_daily_data
 @irc.on_join(:if => lambda {|e| e.nick == @irc.me}) do |e|
   @irc.msg(e.channel, "WHATS WRONG WITH BEING SEXY")
   @channel_list.push(e.channel)
+end
+
+@irc.heard_namreply do |e|
+  names = e.msg.params[3].split(/\s+/)
+  for nick in names
+    nick = nick.sub(/^%/, "").sub(/^@/, "")
+    @irc.whois(nick)
+  end
+end
+
+@irc.heard_join(:if => lambda {|e| e.nick != @irc.me}) do |e|
+  @irc.whois(e.nick)
+end
+
+@irc.heard_numeric_671 do |e|
+  nick = e.msg.params[1].sub(/^%/, "").sub(/^@/, "")
+  @ssl_users[nick] = true
+  @irc.log.debug("Setting #{nick} as an SSL user")
+end
+
+@irc.heard_nick do |e|
+  @ssl_users[e.message] = @ssl_users[e.nick]
+  @ssl_users[e.nick] = false
+  @irc.log.debug("New SSL list:")
+  @irc.log.debug(@ssl_users.inspect)
 end
 
 # You should *never* override the on_ping callback unless you handle the PONG manually!!
@@ -114,6 +144,19 @@ end
   if e.message =~ /^#{@irc.me}/
     random_message(e.channel)
     e.handled!
+  end
+end
+
+# This filter does some horrible trickery to fake event data when an alias
+# regex matches the event.  This allows us to "dedupe" users who have multiple
+# handles / logins.
+@irc.hearing_msg do |e|
+  @message = OpenStruct.new(:nick => e.nick, :prefix => e.msg.prefix, :user => e.msg.user, :host => e.msg.host)
+  for regex,data in @aliases["patterns"]
+    if e.msg.prefix =~ regex
+      @irc.log.debug "Alias detected (#{regex.inspect})!"
+      @message = OpenStruct.new(data)
+    end
   end
 end
 

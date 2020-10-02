@@ -1,5 +1,5 @@
 # What do we call this variant?
-:name: Ultimate RPS-7 Challenge
+:name: "Nerdmaster's RPS Ultimate Edition Super-XL Mark III, Deluxe Pro Edition (No ads!)"
 
 # Messages must use symbols for the object types.  All types must have a top-level entry, but they
 # must then only define keys for object types they defeat.  In the below example, if you want to
@@ -12,31 +12,145 @@
 # ways.  Similarly, if you have two types that both have each other in their hashes, it's hard to
 # say which the engine will consider the victor.
 :messages:
-  :paper:
-    :air: Paper fans air
-    :rock: Paper covers rock
-    :water: Paper floats on water
-  :scissors:
-    :paper: Scissors cut paper
-    :air: Scissors swish through air
-    :sponge: Scissors cut sponge
-  :air:
-    :rock: Air erodes rock
-    :water: Air evaporates water
-    :fire: Air blows out fire
+  :war_elephant:
+    :internet_explorer: War elephant gores IE for still sucking ass after all these years
+    :babby: 'War elephant: finally answering the age-old question, "How is babby gored?"'
+    :boulder: "War elephant nudges the boulder off a cliff"
+    :mozart: "War elephants tend to prefer Beethoven to Mozart"
+    :dong: "War elephants can squish dongs.  Hell, war elephants' *dongs* can squish dongs."
+    :hurtful_remarks: "Calling a war elephant names is a bad idea.  War Elephant HyperRage causes mayhem.  Nobody wins, but hurtful remarks definitely lose."
+    :potato: SQUISH!  Mashed potatoes!  That's a victory for everybody!  Except potato, I guess.  Hmm.
+
+  :internet_explorer:
+    :marijuana: IE browses to http://www.nida.nih.gov/infofacts/marijuana.html, proving once and for all that pot is bad, mmkay?
+    :dybbuk: IE security flaws anger the security-minded Dybbuk
+    :indiana_jones: "IE browses to IMDB, showing Indy that he's nothing but a work of fiction"
+    :atheism: "IE has no soul, and therefore is an atheist, making it a sad, sad day for atheism"
+    :rock: IE is, in fact, more effective at web browsing than a rock.  Who knew?
+    :hurtful_remarks: A hurtful remark thrown at IE yields hundreds of far more painful insults.  IE wins.
+    :potatoe: Bing will find what you meant to type even if you search for "potatoe", jackass.
+
+  :marijuana:
+    :war_elephant: Marijuana calms war elephants
+    :babby: Marijuana puts daddy in jail, leaving mommy and babby all alone
+    :boulder: Marijuana stones the boulder, causing a time-space paradox that only Janeway can figure out, which causes massive brain damage to the viewer
+    :mozart: After Mozart started toking up, his career went to hell, he lost his wife and kids, and eventually sold his body for drug money
+    :dong: Don't you know?  Pot ruins your reproductive system, man.  Your dong is like, totally useless now, man.
+    :batman: Batman's sitting on the couch discussing philosophy, and Joker runs amok unchecked.  Marijuana wins.
+    :potatoe: Even stoners can spell "potato", and they lose an average of 8 IQ points!
+
+  :babby:
+    :internet_explorer: Babby breaks computers running IE (Babby should have been supervised)
+    :dybbuk: "Dybbuk fears babby and runs away"
+    :indiana_jones: Babby distracts Indy and the natives make their kill
+    :atheism: "Babby is a miracle, thus disproving atheism"
+    :rock: Babby throws rocks at cars.  Babby has no respect for geology.  Fuckin' babby.
+    :hurtful_remarks: Babby doesn't understand your hurtful remarks.  Babby repeats them, though, getting you in trouble.
+    :potato: Babby eat potato.  Potato not eat babby.
+
+  :dybbuk:
+    :marijuana: "Dybbuk burns fields of marijuana for... \"public safety\""
+    :war_elephant: "Dybbuk is a mason, and the war elephant never stood a chance"
+    :boulder: Silly rabbit, boulders are for babbies, not Dybbuks!
+    :atheism: Dybbuk defeats atheism with wit and sorcery
+    :dong: Dybbuk can handle his dong like an expert
+    :hurtful_remarks: Dybbuk is a pacifist, and not even hurtful remarks can get a rise out of him
+    :potatoe: Dybbuk laughs at your shitty spelling and shows you "potato" in one of his many dictionaries he carries around for just these sorts of situations.
+
+  :indiana_jones:
+    :war_elephant: "No time for being gored, Doctor Jones"
+    :dybbuk: Indy has a beer with Dybbuk, then steals his expensive books because "they belong in a museum!"
+    :marijuana: "Indiana Jones gets the girl and saves the day without getting high on marijuana... why can't you?"
+    :mozart: "Indy loves Mozart... a little *too* much.  Mozart cries for a while but never presses charges."
+    :rock: We all know Indy can't defeat a boulder, but come on... a rock?  Indy wins easily.  Try again, fuckhole.
+    :batman: Indiana Jones is no match for Batman in a fair fight... so he pulls out a gun.  Batman loses.
+    :potatoe: Indy will eat a potatoe, he doesn't give a fuck
+
+  :boulder:
+    :indiana_jones: Boulders chase Indiana Jones in very improbable and scary ways
+    :babby: Boulder smash babby!
+    :internet_explorer: "A boulder has no time for IE's shenanigans, and switches browsers"
+    :atheism: "Boulders squish atheists, ending their existence forever"
+    :dong: You can smack boulders with your dick all day if you like, but ultimately the boulder wins
+    :batman: Batman has no superhuman strength.  Boulder wins.
+    :potato: Boulder puts potato into check-mate within 8 moves.  STUPID GODDAMN POTATO, I HAD $20 RIDING ON THAT GAME!
+
+  :atheism:
+    :war_elephant: "Atheism lasts forever, unlike war elephants"
+    :marijuana: "Atheists don't want spiritual enlightenment, and therefore don't need mind-altering substances like marijuana"
+    :indiana_jones: "Indiana Jones never goes after ancient atheist artifacts, proving atheism is his one weakness"
+    :mozart: "Atheists are disgusting, foul creatures, but Mozart was far worse: a *Freemason*"
+    :dong: Atheists need dong-love, too
+    :batman: Batman's religious beliefs were never really made clear, so maybe he IS an atheist.  With nothing left to believe in, he gives up and commits suicide.
+    :potatoe: Atheists don't believe in anything but man.  Man misspells.  Therefore atheists accept potatoe into their hearts.  And stomachs.  Potatoe is eaten.
+
+  :mozart:
+    :internet_explorer: "Mozart would never have approved of the latest UI changes in Internet Explorer, no, sir!"
+    :babby: "Mozart calms Babby and some say he makes Babby smarter!"
+    :dybbuk: Dybbuk listens to Ministry, but also Mozart.  How does that make Dybbuk lose?  No fucking clue.  But he does.
+    :boulder: "Umm... play Mozart loud enough and you can literally break a boulder?"
+    :rock: Mozart was around WAY before rock
+    :batman: Batman may be super smart, but he never composed jack shit.  Mozart wins.
+    :potato: Mozart ate potatoes just like everybody else.
+
+  :dong:
+    :internet_explorer: IE can't handle all the dongs the interwebs have
+    :babby: Dong brought babby into this world, and dong can take babby out!
+    :indiana_jones: Indy once again lets his dong do the thinking, and ends up in PERIL
+    :rock: Dongs can be R0cK H@rD with v1agr@ order now!  Plus you can R0cK H3r @ll n1ght if you click here.
+    :mozart: Dong-slapping Mozart is funny.  Mozart loses.
+    :batman: Yup, Batman's a crazy kick-ass crime-fighting detective, but he's got a micropenis.  Dong wins.
+    :potato: Yes, you can in fact fuck a potato if you're careful.  Dong wins.
+
   :rock:
-    :scissors: Rock crushes scissors
-    :sponge: Rock crushes sponge
-    :fire: Rock pounds out fire
-  :sponge:
-    :paper: Sponge soaks paper
-    :air: Sponge uses air pockets
-    :water: Sponge absorbs water
-  :water:
-    :scissors: Water rusts scissors
-    :rock: Water erodes rock
-    :fire: Water puts out fire
-  :fire:
-    :paper: Fire burns paper
-    :scissors: Fire melts scissors
-    :sponge: Fire burns sponge
+    :war_elephant: If the rocks are very round and there are many of them, you can trip a war elephant.  It's true, I read it on the Internet!
+    :marijuana: Soil is like lots of little tiny nutrient-rich rocks... sorta... right?  And marijuana needs soil, so ... rock wins.  Suck it, pothead!
+    :dybbuk: Dybbuk likes rock, but Dybbuk doesn't rock
+    :boulder: A boulder is just a big rock.  A big, clumsy, unweildy rock that gets in the god damn way.
+    :atheism: Christain rock is still around.  Absolute proof that there must be a sick, evil god out there.
+    :hurtful_remarks: Music makes me feel better after being made fun of by you and your caste.  Rock wins.
+    :potato: When you eat a potato with rocks in it, you and potato both lose.  But rocks win.
+
+  :batman:
+    :war_elephant: Batman zips around like an idiot in his weird-ass suit, but it does prevent war elephant attacks
+    :internet_explorer: Come on!  Batman probably invented his own web browser back in the 1950s.  IE never stood a chance.
+    :hurtful_remarks: Batman has self-confidence, and crushes hurtful remarks with good, solid detective work
+    :rock: Batman rocks!
+    :babby: Batman takes babby under his wing and churns out Robin.  Batman wins.  Fans lose.
+    :dybbuk: Sorry, but Batman is smarter *and* has cooler toys than Dybbuk
+    :potatoe: Batman is the world's best detective.  I think he knows "potatoe" is incorrect.
+
+  :hurtful_remarks:
+    :marijuana: Hurtful remarks create low self-esteem, which leads to marijuana abuse
+    :boulder: Shouting mean things in the middle of Boulder results in hilarious, angry hippies.  Fun!
+    :dong: YOUR DONG IS TINY, LOSER!  HAH!
+    :mozart: Mozart gets depressed from all the insults and sells his body for drug money.  But this time he does it... IN SPACE!
+    :indiana_jones: Turns out Indy is really insecure.  A few well-turned phrases and he's blubbering like a baby.  Hurtful remarks are, once again, the right answer.
+    :atheism: Atheists are stupid for not believing in Jesus Christ our savior.  Fucking dumb douchebag atheist slut fucker!  Hurtful remarks WOOO!
+    :potatoe: You can't hurl hurtful remarks at a potato, that's ridiculous!  Oh, it was a potatoe?  Okay, that's sensible.  Potatoe loses.
+
+  :potato:
+    :hurtful_remarks: You can't hurl hurtful remarks at a potato, that's ridiculous!
+    :batman: A delicious baked potato is Batman's only weakness!  Well, that and bullets, knives, poison, ... shit, Batman kind of sucks.
+    :internet_explorer: You insert potato into IE.  Potato gums up computer and IE breaks.  You're in a maze of twisty little passages, all alike.
+    :marijuana: The potato is legal EVERYWHERE.  Pot isn't, even though it's "Potato" without the "ato".  Pot concedes to its multisyllabic friend's clear superiority.
+    :dybbuk: Dybbuk is pleased with the potato that is spelled properly.  So pleased he lets down his guard.. AND POTATO STRIKES!
+    :indiana_jones: Indy can't figure out the purpose of the potato within ancient Mayan culture
+    :atheism: Perfect potato proves polytheism perfect.  You fucking atheist.
+
+  :potatoe:
+    :potato: By the time you read this, "potatoe" will probably be an accepted spelling.  Suck it, potato!
+    :dong: Jam a dong into a potato if you like, but a potatoe?!?  Bad idea.  Very bad idea.
+    :babby: You teach babby about the "potatoe".  Babby grows up to be a fucking moron who can't spell.
+    :rock: Today's rock musicians can't spell, so "potatoe" becomes even more prevalent.  ROCK LOSES.
+    :mozart: Great musicians like Mozart don't eat misspelled potatoes, you fool!
+    :war_elephant: SQUISH!  Wait, what the shit would a mashed potatoe be?  Not delicious, that's for fucking sure.  War elephant dies, thanks to your idiocy.  Just like the English language.
+    :boulder: "Potatoe outplays boulder at chess, backgammon, go, and Magic: the Gathering!  Holy shit, potatoe!  Well done, sir!"
+
+  #:bathroom_beer:
+
+  #:jerkroom_juice:
+
+  #:hemp:
+
+  #:trees:

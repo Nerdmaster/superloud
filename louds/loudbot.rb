@@ -17,6 +17,9 @@ def init_data
 
   # Load ignore list
   load_ignore_list
+
+  # Load aliases so people stop FUCKING CHEATING
+  load_aliases
 end
 
 # Loads the list of users to ignore and users that are whitelisted - typically
@@ -33,6 +36,16 @@ def load_ignore_list
   allowedlist = FileTest.exist?("config/whitelist.txt") ? IO.readlines("config/whitelist.txt") : []
   for allowed in allowedlist
     @whitelist_regexes.push Regexp.new(allowed.strip, Regexp::IGNORECASE)
+  end
+end
+
+# Loads the list of user aliases to reduce cheating
+def load_aliases
+  @aliases = YAML.load_file("config/aliases.yml")
+  @aliases["patterns"] = {}
+  for pattern,data in @aliases["aliases"]
+    regex = Regexp.new(pattern.strip, Regexp::IGNORECASE)
+    @aliases["patterns"][regex] = data
   end
 end
 
@@ -60,7 +73,7 @@ def is_it_loud?(text, &block)
   # Rules are getting complex - let's handle them one at a time
   errors.push("too short") if len < 11
   errors.push("too low uppercase ratio") if uppercase_count < len * 0.60
-  errors.push("shut up") if (text =~ /retard/ || text =~ /reetard/)
+  errors.push("shut up") if text =~ /re+tard/i
 
   # If there are any errors, the text is bad and nothing else needs to happen
   unless errors.empty?
@@ -86,6 +99,9 @@ def is_it_loud?(text, &block)
 
   # What about letters per word?!?
   errors.push("words are too small") if (words.count > 0) && (letters.count / words.count < 3.0)
+
+  # No non-louds!  A sentence isn't loud IF IT ENDS WITH A PERIOD!
+  errors.push("friggin' periods") if text =~ /\.$/
 
   unless errors.empty?
     yield(:rejected, errors.join(", "))
@@ -126,7 +142,7 @@ def incoming_message(e)
       when :loud
         @irc.log.debug "IT WAS LOUD!  #{text.inspect}"
         random_message(e.channel)
-        @messages.add(:text => text, :author => e.nick)
+        @messages.add(:text => text, :author => @message.nick)
     end
   end
 end

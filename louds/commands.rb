@@ -5,8 +5,9 @@ require "digest"
 
 # Commands we support
 VALID_COMMANDS = [
-  :dongwinners, :dongrankme, :dongme, :redongme, :upvote, :downvote, :score, :help, :rps, :biggestdong, :size, :sizeme,
-  :refresh_ignores, :omakase
+  :dongwinners, :dwall, :dongrankme, :dongme, :redongme, :upvote, :downvote,
+  :score, :help, :rps, :biggestdong, :size, :sizeme, :refresh_ignores,
+  :refresh_aliases, :omakase
 ]
 
 PLACES = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"]
@@ -46,10 +47,10 @@ end
 # Increments rerolls and sends inappropriate imagery
 def redongme(e, params)
   # Clear old size data for this user
-  @size_data[user_hash(e.msg)] = Hash.new(0)
+  @size_data[user_hash(@message)] = Hash.new(0)
 
   # Increment mulligan count
-  @redongs[user_hash(e.msg)] += 1
+  @redongs[user_hash(@message)] += 1
 
   # Send a BRAND NEW DONG!!!
   send_dong(e)
@@ -57,11 +58,11 @@ end
 
 # Votes the current message +1
 def upvote(e, params)
-  @messages.vote(user_hash(e.msg), 1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
+  @messages.vote(user_hash(@message), 1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
 end
 
 def downvote(e, params)
-  @messages.vote(user_hash(e.msg), -1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
+  @messages.vote(user_hash(@message), -1) or @irc.msg(e.nick, "SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
 end
 
 # Reports the last message's score
@@ -98,6 +99,7 @@ def help(e, params)
   end
 
   case params.first
+    when "DWALL" then send.call "!DWALL: SHOW EVERYBODY'S RANK, EVEN THE WORTHLESS FOLK"
     when "DONGWINNERS" then send.call "!DONGWINNERS [NUMBER]: SHOW THE PEOPLE WHO " +
                                       "FUCKING MATTER, BY DEFAULT DOES THE " +
                                       "TOP 2 FOR THE DAY... JUST LIKE A SLOW NIGHT FOR YERMOM"
@@ -127,7 +129,7 @@ def size(e, params)
     if datanick == name
      cm = data[:size] / 2.0
      inches = cm / 2.54
-     fmt = name == e.nick.upcase ? "HEY %s YOUR DONG IS" : "%s'S DONG IS"
+     fmt = name == @message.nick.upcase ? "HEY %s YOUR DONG IS" : "%s'S DONG IS"
      msg = "#{fmt} %0.1f INCHES (%0.1f CM)" % [name, inches, cm]
      break
     end
@@ -140,11 +142,11 @@ end
 
 # Reports users's current dong size
 def sizeme(e, params)
-  size(e, [e.nick])
+  size(e, [@message.nick])
 end
 
 def dongrankme(e, params)
-  uhash = user_hash(e.msg)
+  uhash = user_hash(@message)
   user_size_data = @size_data[uhash]
   if !user_size_data
     @irc.msg(e.channel || e.nick, "YOU DON'T HAVE A DONG DUMBASS")
@@ -153,6 +155,10 @@ def dongrankme(e, params)
 
   rank = size_to_rank(user_size_data[:size])
   @irc.msg(e.channel || e.nick, "YOU ARE CURRENTLY RANKED %s!" % placetext(rank))
+end
+
+def dwall(e, params)
+  dongwinners(e, [10])
 end
 
 def dongwinners(e, params)
@@ -181,6 +187,12 @@ def refresh_ignores(e, params)
   load_ignore_list
 end
 
+# Reloads the alias list
+def refresh_aliases(e, params)
+  return unless params.first == @password
+  load_aliases
+end
+
 # Mocks Rails and particularly DHH
 def omakase(e, params)
     tool = params.empty? ? "SUPERLOUD" : params.join(" ").upcase
@@ -198,7 +210,7 @@ end
 
 # Takes an event message and returns a semi-unique hash number representing the user + host
 def user_hash(message)
-  return Digest::MD5.hexdigest(message.user).to_i(16) + Digest::MD5.hexdigest(message.host).to_i(16)
+  return Digest::MD5.hexdigest(message.user).to_i(16)
 end
 
 # Computes and seeds RNG with the given event's user hash combined with today's date and optional
@@ -219,7 +231,7 @@ end
 
 # Computes size for a given event message.  Stores data into list of sizes for the day.
 def compute_size(e)
-  user_hash = user_hash(e.msg)
+  user_hash = user_hash(@message)
   mulligans = @redongs[user_hash]
 
   # Modify size by an increasing value - more redongs means more and more loss
@@ -228,10 +240,15 @@ def compute_size(e)
   # Get size by using daily seed
   size = 0
   user_seed(user_hash, mulligans * 53) do
-    size = [2, fair_dong_size + size_modifier].max
+    # Is it MICROPENIS MONDAY?!?
+    if Time.now.wday == 1
+      size = [2, microdong_size + size_modifier].max
+    else
+      size = [2, fair_dong_size + size_modifier].max
+    end
   end
 
-  @size_data[user_hash] = {:size => size, :nick => e.nick, :hash => user_hash}
+  @size_data[user_hash] = {:size => size, :nick => @message.nick, :hash => user_hash}
 
   return size
 end
@@ -281,6 +298,17 @@ def userlist_text(userlist)
     when 2 then return userlist.join(" AND ")
     else        return userlist[0..-2].join(", ") + ", AND #{userlist.last}"
   end
+end
+
+# Returns a value in 1/2cm units of a randomized, normalized microdong length.
+# This is a simplified copy of the normal code except that we roll 3d5 instead
+# of 3d15.  This makes the average around 1/2 normal, while the maximum is
+# about 1/3rd the normal maximum.
+def microdong_size
+  average = 28
+  roll = Dice.roll(3, 5) - 22
+  percent = (100 + roll * 3) / 100.0
+  return (percent * average).to_i
 end
 
 # Returns a value in 1/2cm units of a randomized, normalized dong length
