@@ -1,3 +1,5 @@
+SUPERLOUD - AMAZING PROJECT
+
 THIS IS AN EXAMPLE OF A REALLY LOVELY RUBY-BASED IRC LIBRARY CALLED Net::YAIL.  YAIL CAN BE FOUND
 AT https://github.com/Nerdmaster/ruby-irc-yail OR ALSO DOCS ARE FOUND AT http://ruby-irc-yail.nerdbucket.com/
 
