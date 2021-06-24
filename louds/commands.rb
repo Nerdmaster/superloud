@@ -210,7 +210,7 @@ end
 
 # Takes an event message and returns a semi-unique hash number representing the user + host
 def user_hash(message)
-  return Digest::MD5.hexdigest(message.user).to_i(16)
+  return Digest::MD5.hexdigest(message.user).to_i(16) + Digest::MD5.hexdigest(message.host).to_i(16)
 end
 
 # Computes and seeds RNG with the given event's user hash combined with today's date and optional
