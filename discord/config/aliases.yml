@@ -1,0 +1,6 @@
+# Map secondary Discord user IDs to a primary user ID
+# This prevents cheating by using alt accounts
+# Format:
+#   aliases:
+#     "secondary_user_id": "primary_user_id"
+aliases: {}

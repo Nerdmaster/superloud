@@ -1,0 +1,24 @@
+# Discord bot configuration
+# Copy to config.yml and fill in your values
+
+# Channel ID where the bot operates (right-click channel -> Copy ID)
+channel_id: "123456789012345678"
+
+# Admin user IDs (right-click user -> Copy ID)
+admin_ids:
+  - "123456789012345678"
+
+# Database path
+db_path: "db/louds.db"
+
+# RPS config path
+rps_path: "rps/rps.yml"
+
+# Ignores file path
+ignores_path: "config/ignores.txt"
+
+# Whitelist file path
+whitelist_path: "config/whitelist.txt"
+
+# Aliases file path
+aliases_path: "config/aliases.yml"

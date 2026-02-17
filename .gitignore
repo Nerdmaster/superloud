@@ -2,3 +2,9 @@ rps/rps.yml
 /config/ignores.txt
 /config/password.txt
 /db/louds.db
+/discord/db/
+/discord/config/config.yml
+/discord/.env
+/discord/config/ignores.txt
+/discord/config/password.txt
+/discord/superloud
