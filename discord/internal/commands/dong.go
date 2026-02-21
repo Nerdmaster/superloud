@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"sort"
 	"strings"
@@ -100,7 +101,24 @@ func (r *Registry) cmdReDongMe(ctx *CommandContext) {
 func (r *Registry) sendDong(ctx *CommandContext) {
 	userHash := util.UserHash(r.Filters.ResolveAlias(ctx.UserID))
 	size := r.computeSize(userHash, ctx.UserName)
+	r.persistDong(userHash)
 	ctx.Reply(fmt.Sprintf("8%sD", strings.Repeat("=", size)))
+}
+
+// persistDong saves the current dong state for a user to the database.
+func (r *Registry) persistDong(userHash int64) {
+	if r.Store == nil {
+		return
+	}
+	entry := r.SizeData[userHash]
+	if entry == nil {
+		return
+	}
+	todayInt := dateToInt(time.Now())
+	redongs := r.Redongs[userHash]
+	if err := r.Store.SaveDong(todayInt, userHash, entry.Nick, entry.Size, redongs); err != nil {
+		log.Printf("WARNING: FAILED TO PERSIST DONG: %v", err)
+	}
 }
 
 func (r *Registry) cmdSizeMe(ctx *CommandContext) {

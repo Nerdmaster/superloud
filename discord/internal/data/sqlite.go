@@ -50,6 +50,24 @@ func NewSQLiteStore(filename string) (*SQLiteStore, error) {
 		}
 	}
 
+	// Create dongs table (safe for existing DBs)
+	dongsSchema := `
+		CREATE TABLE IF NOT EXISTS dongs (
+			id        INTEGER PRIMARY KEY AUTOINCREMENT,
+			date_int  INTEGER NOT NULL,
+			user_hash INTEGER NOT NULL,
+			nick      TEXT    NOT NULL,
+			size      INTEGER NOT NULL,
+			redongs   INTEGER NOT NULL DEFAULT 0,
+			UNIQUE(date_int, user_hash)
+		);
+		CREATE INDEX IF NOT EXISTS dongs_date_idx ON dongs (date_int);
+	`
+	if _, err := db.Exec(dongsSchema); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("creating dongs schema: %w", err)
+	}
+
 	return &SQLiteStore{db: db}, nil
 }
 
@@ -140,4 +158,67 @@ func (s *SQLiteStore) RetrieveMessages() ([]*Message, error) {
 	}
 
 	return results, nil
+}
+
+// DongEntry represents a persisted dong record.
+type DongEntry struct {
+	Size int
+	Nick string
+	Hash int64
+}
+
+// SaveDong upserts a dong entry for the given date and user.
+func (s *SQLiteStore) SaveDong(dateInt int, userHash int64, nick string, size int, redongs int) error {
+	_, err := s.db.Exec(`
+		INSERT INTO dongs (date_int, user_hash, nick, size, redongs)
+		VALUES (?, ?, ?, ?, ?)
+		ON CONFLICT(date_int, user_hash) DO UPDATE SET
+			nick = excluded.nick,
+			size = excluded.size,
+			redongs = excluded.redongs
+	`, dateInt, userHash, nick, size, redongs)
+	return err
+}
+
+// LoadDongs loads all dong entries for a given date.
+// Returns the size data map and redongs map.
+func (s *SQLiteStore) LoadDongs(dateInt int) (map[int64]*DongEntry, map[int64]int, error) {
+	rows, err := s.db.Query(
+		"SELECT user_hash, nick, size, redongs FROM dongs WHERE date_int = ?", dateInt)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+
+	sizeData := make(map[int64]*DongEntry)
+	redongs := make(map[int64]int)
+
+	for rows.Next() {
+		var userHash int64
+		var nick string
+		var size, rd int
+		if err := rows.Scan(&userHash, &nick, &size, &rd); err != nil {
+			return nil, nil, err
+		}
+		sizeData[userHash] = &DongEntry{Size: size, Nick: nick, Hash: userHash}
+		redongs[userHash] = rd
+	}
+	if err := rows.Err(); err != nil {
+		return nil, nil, err
+	}
+
+	return sizeData, redongs, nil
+}
+
+// DeleteDong removes a single dong entry.
+func (s *SQLiteStore) DeleteDong(dateInt int, userHash int64) error {
+	_, err := s.db.Exec(
+		"DELETE FROM dongs WHERE date_int = ? AND user_hash = ?", dateInt, userHash)
+	return err
+}
+
+// ClearOldDongs removes dong entries from days other than the given date.
+func (s *SQLiteStore) ClearOldDongs(keepDateInt int) error {
+	_, err := s.db.Exec("DELETE FROM dongs WHERE date_int != ?", keepDateInt)
+	return err
 }

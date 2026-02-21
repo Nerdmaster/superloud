@@ -72,7 +72,7 @@ func main() {
 	}
 
 	// Initialize command registry
-	registry = commands.NewRegistry(cfg, msgs, filters, rpsEngine)
+	registry = commands.NewRegistry(cfg, msgs, filters, rpsEngine, store)
 
 	// Initialize daily data
 	lastDay = todayInt()
@@ -268,8 +268,22 @@ func onInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	// Handle admin subcommand
 	command := cmdData.Name
 	if command == "admin" && len(cmdData.Options) > 0 {
-		command = cmdData.Options[0].Name
-		params = nil // admin subcommands don't have additional params
+		subCmd := cmdData.Options[0]
+		command = subCmd.Name
+		// Parse subcommand options
+		params = nil
+		for _, opt := range subCmd.Options {
+			switch opt.Type {
+			case discordgo.ApplicationCommandOptionUser:
+				if opt.UserValue(s) != nil {
+					params = append(params, opt.UserValue(s).Username)
+				}
+			case discordgo.ApplicationCommandOptionString:
+				params = append(params, opt.StringValue())
+			case discordgo.ApplicationCommandOptionInteger:
+				params = append(params, fmt.Sprintf("%d", opt.IntValue()))
+			}
+		}
 	}
 
 	// Determine if this should be ephemeral
@@ -418,6 +432,19 @@ func registerSlashCommands(s *discordgo.Session) {
 					Type:        discordgo.ApplicationCommandOptionSubCommand,
 					Name:        "refresh_aliases",
 					Description: "RELOAD THE ALIAS LIST",
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "undong",
+					Description: "REMOVE A USER'S DONG FOR TODAY",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:        discordgo.ApplicationCommandOptionUser,
+							Name:        "user",
+							Description: "THE USER WHOSE DONG TO REMOVE",
+							Required:    true,
+						},
+					},
 				},
 			},
 		},

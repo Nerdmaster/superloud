@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"log"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dialmaster/superloud-discord/internal/config"
@@ -31,6 +33,7 @@ type Registry struct {
 	Messages *data.Messages
 	Filters  *middleware.Filters
 	RPS      *rps.Engine
+	Store    *data.SQLiteStore
 
 	handlers map[string]HandlerFunc
 
@@ -45,12 +48,13 @@ type SizeEntry struct {
 	Hash int64
 }
 
-func NewRegistry(cfg *config.Config, msgs *data.Messages, filters *middleware.Filters, rpsEngine *rps.Engine) *Registry {
+func NewRegistry(cfg *config.Config, msgs *data.Messages, filters *middleware.Filters, rpsEngine *rps.Engine, store *data.SQLiteStore) *Registry {
 	r := &Registry{
 		Config:   cfg,
 		Messages: msgs,
 		Filters:  filters,
 		RPS:      rpsEngine,
+		Store:    store,
 		SizeData: make(map[int64]*SizeEntry),
 		Redongs:  make(map[int64]int),
 		handlers: make(map[string]HandlerFunc),
@@ -73,6 +77,9 @@ func NewRegistry(cfg *config.Config, msgs *data.Messages, filters *middleware.Fi
 	r.handlers["rps"] = r.cmdRPS
 	r.handlers["refresh_ignores"] = r.cmdRefreshIgnores
 	r.handlers["refresh_aliases"] = r.cmdRefreshAliases
+	r.handlers["undong"] = r.cmdUndong
+
+	r.loadPersistedDongs()
 
 	return r
 }
@@ -95,6 +102,49 @@ func (r *Registry) IsValidCommand(command string) bool {
 func (r *Registry) ResetDaily() {
 	r.SizeData = make(map[int64]*SizeEntry)
 	r.Redongs = make(map[int64]int)
+	if r.Store != nil {
+		now := time.Now()
+		todayInt := now.Year()*10000 + int(now.Month())*100 + now.Day()
+		if err := r.Store.ClearOldDongs(todayInt); err != nil {
+			log.Printf("WARNING: FAILED TO CLEAR OLD DONGS: %v", err)
+		}
+	}
+}
+
+// loadPersistedDongs loads today's dongs from the database into memory.
+func (r *Registry) loadPersistedDongs() {
+	if r.Store == nil {
+		return
+	}
+	now := time.Now()
+	todayInt := now.Year()*10000 + int(now.Month())*100 + now.Day()
+
+	// Clean up old days
+	if err := r.Store.ClearOldDongs(todayInt); err != nil {
+		log.Printf("WARNING: FAILED TO CLEAR OLD DONGS: %v", err)
+	}
+
+	// Load today's dongs
+	entries, redongs, err := r.Store.LoadDongs(todayInt)
+	if err != nil {
+		log.Printf("WARNING: FAILED TO LOAD PERSISTED DONGS: %v", err)
+		return
+	}
+
+	for hash, entry := range entries {
+		r.SizeData[hash] = &SizeEntry{
+			Size: entry.Size,
+			Nick: entry.Nick,
+			Hash: entry.Hash,
+		}
+	}
+	for hash, count := range redongs {
+		r.Redongs[hash] = count
+	}
+
+	if len(entries) > 0 {
+		log.Printf("LOADED %d PERSISTED DONGS FOR TODAY", len(entries))
+	}
 }
 
 // ValidCommands returns a list of all command names.
