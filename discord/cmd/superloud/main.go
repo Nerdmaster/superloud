@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"io"
+	"log/slog"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -16,6 +18,7 @@ import (
 	"github.com/dialmaster/superloud-discord/internal/loudbot"
 	"github.com/dialmaster/superloud-discord/internal/middleware"
 	"github.com/dialmaster/superloud-discord/internal/rps"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var (
@@ -25,6 +28,45 @@ var (
 	filters  *middleware.Filters
 	lastDay  int
 )
+
+func initLogger(cfg *config.Config) {
+	// Parse log level
+	var level slog.Level
+	switch strings.ToLower(cfg.LogLevel) {
+	case "debug":
+		level = slog.LevelDebug
+	case "warn", "warning":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
+
+	// Ensure log directory exists
+	logDir := filepath.Dir(cfg.LogPath)
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "FAILED TO CREATE LOG DIRECTORY %s: %v\n", logDir, err)
+		os.Exit(1)
+	}
+
+	// Create lumberjack rotating writer
+	fileWriter := &lumberjack.Logger{
+		Filename:   cfg.LogPath,
+		MaxSize:    cfg.LogMaxSizeMB,
+		MaxBackups: cfg.LogMaxBackups,
+		MaxAge:     cfg.LogMaxAgeDays,
+		Compress:   cfg.LogCompress,
+	}
+
+	// Write to both file and stdout
+	multiWriter := io.MultiWriter(fileWriter, os.Stdout)
+
+	handler := slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{
+		Level: level,
+	})
+	slog.SetDefault(slog.New(handler))
+}
 
 func main() {
 	// Load config
@@ -36,43 +78,57 @@ func main() {
 	var err error
 	cfg, err = config.Load(configPath)
 	if err != nil {
-		log.Fatalf("FAILED TO LOAD CONFIG: %v", err)
+		fmt.Fprintf(os.Stderr, "FAILED TO LOAD CONFIG: %v\n", err)
+		os.Exit(1)
 	}
 
 	if cfg.Token == "" {
-		log.Fatal("DISCORD_TOKEN ENVIRONMENT VARIABLE IS NOT SET")
+		fmt.Fprintf(os.Stderr, "DISCORD_TOKEN ENVIRONMENT VARIABLE IS NOT SET\n")
+		os.Exit(1)
 	}
+
+	// Initialize logger (requires config)
+	initLogger(cfg)
+	slog.Info("configuration loaded", "config_path", configPath)
 
 	// Initialize SQLite store
 	store, err := data.NewSQLiteStore(cfg.DBPath)
 	if err != nil {
-		log.Fatalf("FAILED TO OPEN DATABASE: %v", err)
+		slog.Error("failed to open database", "db_path", cfg.DBPath, "error", err)
+		os.Exit(1)
 	}
 	defer store.Close()
+	slog.Info("database opened", "db_path", cfg.DBPath)
 
 	// Initialize messages
 	msgs = data.NewMessages(store)
 	if err := msgs.Load(); err != nil {
-		log.Fatalf("FAILED TO LOAD MESSAGES: %v", err)
+		slog.Error("failed to load messages", "error", err)
+		os.Exit(1)
 	}
+	slog.Info("messages loaded")
 
 	// Initialize filters
 	filters = middleware.NewFilters()
 	if err := filters.LoadIgnores(cfg); err != nil {
-		log.Printf("WARNING: FAILED TO LOAD IGNORES: %v", err)
+		slog.Warn("failed to load ignores", "error", err)
 	}
 	if err := filters.LoadAliases(cfg); err != nil {
-		log.Printf("WARNING: FAILED TO LOAD ALIASES: %v", err)
+		slog.Warn("failed to load aliases", "error", err)
 	}
+	slog.Info("filters initialized")
 
 	// Initialize RPS engine
 	rpsEngine, err := rps.LoadEngine(cfg.RPSPath)
 	if err != nil {
-		log.Printf("WARNING: FAILED TO LOAD RPS CONFIG: %v", err)
+		slog.Warn("failed to load RPS config", "rps_path", cfg.RPSPath, "error", err)
+	} else {
+		slog.Info("RPS engine loaded", "rps_path", cfg.RPSPath)
 	}
 
 	// Initialize command registry
 	registry = commands.NewRegistry(cfg, msgs, filters, rpsEngine, store)
+	slog.Info("command registry initialized")
 
 	// Initialize daily data
 	lastDay = todayInt()
@@ -80,7 +136,8 @@ func main() {
 	// Create Discord session
 	dg, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
-		log.Fatalf("FAILED TO CREATE DISCORD SESSION: %v", err)
+		slog.Error("failed to create Discord session", "error", err)
+		os.Exit(1)
 	}
 
 	// Set intents
@@ -93,9 +150,11 @@ func main() {
 
 	// Open connection
 	if err := dg.Open(); err != nil {
-		log.Fatalf("FAILED TO OPEN DISCORD CONNECTION: %v", err)
+		slog.Error("failed to open Discord connection", "error", err)
+		os.Exit(1)
 	}
 	defer dg.Close()
+	slog.Info("Discord connection opened")
 
 	// Register slash commands
 	registerSlashCommands(dg)
@@ -106,9 +165,11 @@ func main() {
 
 	go func() {
 		for range ticker.C {
+			slog.Debug("periodic serialization tick")
 			msgs.Serialize()
 			today := todayInt()
 			if lastDay != today {
+				slog.Info("daily reset triggered", "old_day", lastDay, "new_day", today)
 				registry.ResetDaily()
 				lastDay = today
 			}
@@ -116,13 +177,14 @@ func main() {
 	}()
 
 	// Wait for interrupt signal
-	fmt.Println("SUPERLOUD IS NOW RUNNING. PRESS CTRL+C TO EXIT.")
+	slog.Info("superloud is now running, waiting for shutdown signal")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM)
-	<-sc
+	sig := <-sc
 
-	fmt.Println("SHUTTING DOWN...")
+	slog.Info("shutdown signal received", "signal", sig.String())
 	msgs.Serialize()
+	slog.Info("shutdown complete")
 }
 
 func todayInt() int {
@@ -131,10 +193,7 @@ func todayInt() int {
 }
 
 func onReady(s *discordgo.Session, r *discordgo.Ready) {
-	log.Printf("LOGGED IN AS %s", r.User.Username)
-	if cfg.ChannelID != "" {
-		s.ChannelMessageSend(cfg.ChannelID, "WHATS WRONG WITH BEING SEXY")
-	}
+	slog.Info("logged in", "username", r.User.Username, "user_id", r.User.ID)
 }
 
 func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -156,17 +215,21 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Check ignore list
 	if filters.ShouldIgnore(userID) {
+		slog.Debug("message from ignored user", "user_id", userID, "username", userName)
 		return
 	}
 
 	// Check whitelist
 	if !filters.IsWhitelisted(userID) {
+		slog.Debug("message from non-whitelisted user", "user_id", userID, "username", userName)
 		return
 	}
 
 	// Resolve aliases
 	resolvedID := filters.ResolveAlias(userID)
-	_ = resolvedID
+	if resolvedID != userID {
+		slog.Debug("alias resolved", "user_id", userID, "resolved_id", resolvedID)
+	}
 
 	text := m.Content
 
@@ -181,6 +244,13 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		if registry.IsValidCommand(command) {
+			slog.Info("prefix command received",
+				"command", command,
+				"user_id", userID,
+				"username", userName,
+				"channel_id", m.ChannelID,
+				"params", parts[1:],
+			)
 			ctx := &commands.CommandContext{
 				Session:   s,
 				ChannelID: m.ChannelID,
@@ -202,19 +272,22 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Check if someone is talking to the bot (mentions)
 	for _, mention := range m.Mentions {
 		if mention.ID == s.State.User.ID {
+			slog.Debug("bot mentioned", "user_id", userID, "username", userName, "channel_id", m.ChannelID)
 			sendRandomMessage(s, m.ChannelID)
 			return
 		}
 	}
 
 	// Check if the message is loud
-	status, _ := loudbot.IsItLoud(text)
+	status, reason := loudbot.IsItLoud(text)
 	switch status {
 	case loudbot.StatusBad:
 		return
 	case loudbot.StatusRejected:
+		slog.Debug("loud message rejected", "reason", reason, "user_id", userID, "username", userName)
 		sendRandomMessage(s, m.ChannelID)
 	case loudbot.StatusLoud:
+		slog.Info("loud message accepted", "user_id", userID, "username", userName, "channel_id", m.ChannelID)
 		sendRandomMessage(s, m.ChannelID)
 		msgs.Add(text, userName)
 	}
@@ -285,6 +358,14 @@ func onInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			}
 		}
 	}
+
+	slog.Info("slash command received",
+		"command", command,
+		"user_id", userID,
+		"username", userName,
+		"channel_id", i.ChannelID,
+		"params", params,
+	)
 
 	// Determine if this should be ephemeral
 	isEphemeral := command == "rps"
@@ -453,7 +534,9 @@ func registerSlashCommands(s *discordgo.Session) {
 	for _, cmd := range cmds {
 		_, err := s.ApplicationCommandCreate(s.State.User.ID, "", cmd)
 		if err != nil {
-			log.Printf("WARNING: FAILED TO REGISTER SLASH COMMAND %s: %v", cmd.Name, err)
+			slog.Error("failed to register slash command", "command", cmd.Name, "error", err)
+		} else {
+			slog.Debug("slash command registered", "command", cmd.Name)
 		}
 	}
 }

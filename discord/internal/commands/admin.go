@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -11,6 +11,7 @@ import (
 
 func (r *Registry) cmdUndong(ctx *CommandContext) {
 	if !r.Config.IsAdmin(ctx.UserID) {
+		slog.Warn("unauthorized admin command attempt", "command", "undong", "user_id", ctx.UserID, "username", ctx.UserName)
 		return
 	}
 
@@ -65,10 +66,11 @@ func (r *Registry) cmdUndong(ctx *CommandContext) {
 	if r.Store != nil {
 		todayInt := dateToInt(time.Now())
 		if err := r.Store.DeleteDong(todayInt, foundHash); err != nil {
-			log.Printf("WARNING: FAILED TO DELETE DONG FROM DB: %v", err)
+			slog.Error("failed to delete dong from DB", "user_hash", foundHash, "error", err)
 		}
 	}
 
+	slog.Info("admin undong", "admin_id", ctx.UserID, "admin_name", ctx.UserName, "target", foundNick)
 	ctx.Reply(fmt.Sprintf("%s'S DONG HAS BEEN REMOVED", strings.ToUpper(foundNick)))
 }
 
@@ -84,6 +86,7 @@ func isNumeric(s string) bool {
 
 func (r *Registry) cmdRefreshIgnores(ctx *CommandContext) {
 	if !r.Config.IsAdmin(ctx.UserID) {
+		slog.Warn("unauthorized admin command attempt", "command", "refresh_ignores", "user_id", ctx.UserID, "username", ctx.UserName)
 		return
 	}
 
@@ -91,11 +94,13 @@ func (r *Registry) cmdRefreshIgnores(ctx *CommandContext) {
 		ctx.Reply("ERROR RELOADING IGNORES: " + err.Error())
 		return
 	}
+	slog.Info("admin refresh_ignores", "admin_id", ctx.UserID, "admin_name", ctx.UserName)
 	ctx.Reply("IGNORES RELOADED SUCCESSFULLY")
 }
 
 func (r *Registry) cmdRefreshAliases(ctx *CommandContext) {
 	if !r.Config.IsAdmin(ctx.UserID) {
+		slog.Warn("unauthorized admin command attempt", "command", "refresh_aliases", "user_id", ctx.UserID, "username", ctx.UserName)
 		return
 	}
 
@@ -103,5 +108,6 @@ func (r *Registry) cmdRefreshAliases(ctx *CommandContext) {
 		ctx.Reply("ERROR RELOADING ALIASES: " + err.Error())
 		return
 	}
+	slog.Info("admin refresh_aliases", "admin_id", ctx.UserID, "admin_name", ctx.UserName)
 	ctx.Reply("ALIASES RELOADED SUCCESSFULLY")
 }

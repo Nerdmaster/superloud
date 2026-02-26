@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"log"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -89,6 +89,8 @@ func (r *Registry) Dispatch(ctx *CommandContext, command string) {
 	command = strings.ToLower(command)
 	if handler, ok := r.handlers[command]; ok {
 		handler(ctx)
+	} else {
+		slog.Debug("unknown command dispatched", "command", command)
 	}
 }
 
@@ -100,13 +102,14 @@ func (r *Registry) IsValidCommand(command string) bool {
 
 // ResetDaily clears dong data for a new day.
 func (r *Registry) ResetDaily() {
+	slog.Info("daily dong reset")
 	r.SizeData = make(map[int64]*SizeEntry)
 	r.Redongs = make(map[int64]int)
 	if r.Store != nil {
 		now := time.Now()
 		todayInt := now.Year()*10000 + int(now.Month())*100 + now.Day()
 		if err := r.Store.ClearOldDongs(todayInt); err != nil {
-			log.Printf("WARNING: FAILED TO CLEAR OLD DONGS: %v", err)
+			slog.Error("failed to clear old dongs", "error", err)
 		}
 	}
 }
@@ -121,13 +124,13 @@ func (r *Registry) loadPersistedDongs() {
 
 	// Clean up old days
 	if err := r.Store.ClearOldDongs(todayInt); err != nil {
-		log.Printf("WARNING: FAILED TO CLEAR OLD DONGS: %v", err)
+		slog.Error("failed to clear old dongs", "error", err)
 	}
 
 	// Load today's dongs
 	entries, redongs, err := r.Store.LoadDongs(todayInt)
 	if err != nil {
-		log.Printf("WARNING: FAILED TO LOAD PERSISTED DONGS: %v", err)
+		slog.Error("failed to load persisted dongs", "error", err)
 		return
 	}
 
@@ -143,7 +146,7 @@ func (r *Registry) loadPersistedDongs() {
 	}
 
 	if len(entries) > 0 {
-		log.Printf("LOADED %d PERSISTED DONGS FOR TODAY", len(entries))
+		slog.Info("loaded persisted dongs", "count", len(entries))
 	}
 }
 

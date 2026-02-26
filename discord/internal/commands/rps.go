@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 	"sync"
 )
@@ -75,14 +76,27 @@ func (r *Registry) cmdRPS(ctx *CommandContext) {
 	attackerWins, tie, fightMsg := r.RPS.Fight(challenger.Object, existing.Object)
 
 	var text string
+	var outcome string
 	switch {
 	case tie:
 		text = fmt.Sprintf("BUT BOTH WERE USING %s.  OMFG HOW GAY A TIE.", strings.ToUpper(challenger.Object))
+		outcome = "tie"
 	case attackerWins:
 		text = fmt.Sprintf("AND DEFEATS %s: %s", strings.ToUpper(existing.UserName), fightMsg)
+		outcome = "challenger_wins"
 	default:
 		text = fmt.Sprintf("BUT %s IS DEFEATED: %s", strings.ToUpper(challenger.UserName), fightMsg)
+		outcome = "defender_wins"
 	}
+
+	slog.Info("RPS fight result",
+		"challenger", ctx.UserName,
+		"challenger_object", challenger.Object,
+		"defender", existing.UserName,
+		"defender_object", existing.Object,
+		"outcome", outcome,
+		"channel_id", ctx.ChannelID,
+	)
 
 	ctx.Session.ChannelMessageSend(ctx.ChannelID, text)
 

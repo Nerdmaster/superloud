@@ -8,3 +8,4 @@ rps/rps.yml
 /discord/config/ignores.txt
 /discord/config/password.txt
 /discord/superloud
+/discord/logs/

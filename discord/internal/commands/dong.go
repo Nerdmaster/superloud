@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"math/rand"
 	"sort"
 	"strings"
@@ -68,6 +68,8 @@ func (r *Registry) computeSize(userHash int64, userName string) int {
 		Hash: userHash,
 	}
 
+	slog.Debug("dong computed", "user_hash", userHash, "username", userName, "size", size, "mulligans", mulligans)
+
 	return size
 }
 
@@ -94,6 +96,7 @@ func (r *Registry) cmdReDongMe(ctx *CommandContext) {
 
 	// Increment mulligan count
 	r.Redongs[userHash]++
+	slog.Debug("redong requested", "user_id", ctx.UserID, "username", ctx.UserName, "mulligan_count", r.Redongs[userHash])
 
 	r.sendDong(ctx)
 }
@@ -117,7 +120,7 @@ func (r *Registry) persistDong(userHash int64) {
 	todayInt := dateToInt(time.Now())
 	redongs := r.Redongs[userHash]
 	if err := r.Store.SaveDong(todayInt, userHash, entry.Nick, entry.Size, redongs); err != nil {
-		log.Printf("WARNING: FAILED TO PERSIST DONG: %v", err)
+		slog.Error("failed to persist dong", "user_hash", userHash, "error", err)
 	}
 }
 

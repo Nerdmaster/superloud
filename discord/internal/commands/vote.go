@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/dialmaster/superloud-discord/internal/util"
 )
@@ -9,14 +10,20 @@ import (
 func (r *Registry) cmdUpvote(ctx *CommandContext) {
 	userHash := util.UserHash(r.Filters.ResolveAlias(ctx.UserID))
 	if !r.Messages.Vote(userHash, 1) {
+		slog.Debug("duplicate vote rejected", "user_id", ctx.UserID, "username", ctx.UserName, "direction", "up")
 		ctx.Reply("SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
+	} else {
+		slog.Debug("upvote cast", "user_id", ctx.UserID, "username", ctx.UserName)
 	}
 }
 
 func (r *Registry) cmdDownvote(ctx *CommandContext) {
 	userHash := util.UserHash(r.Filters.ResolveAlias(ctx.UserID))
 	if !r.Messages.Vote(userHash, -1) {
+		slog.Debug("duplicate vote rejected", "user_id", ctx.UserID, "username", ctx.UserName, "direction", "down")
 		ctx.Reply("SORRY YOU CAN'T VOTE ON THIS MESSAGE AGAIN")
+	} else {
+		slog.Debug("downvote cast", "user_id", ctx.UserID, "username", ctx.UserName)
 	}
 }
 

@@ -1,7 +1,7 @@
 package data
 
 import (
-	"log"
+	"log/slog"
 	"math/rand"
 	"sync"
 )
@@ -62,6 +62,7 @@ func (ms *Messages) Load() error {
 	ms.random = keys
 
 	ms.dirty = false
+	slog.Info("messages loaded from database", "count", len(ms.messages))
 	return nil
 }
 
@@ -103,7 +104,7 @@ func (ms *Messages) Add(text, author string) {
 	// Also check the database for messages not loaded into memory
 	dbExists, err := ms.store.Exists(text)
 	if err != nil {
-		log.Printf("ERROR checking message existence: %v", err)
+		slog.Error("failed to check message existence", "error", err)
 		return
 	}
 	if dbExists {
@@ -119,6 +120,7 @@ func (ms *Messages) Add(text, author string) {
 	ms.messages[m.Text] = m
 	ms.dirty = true
 	ms.newMessages = append(ms.newMessages, m)
+	slog.Debug("new loud message queued", "author", author)
 }
 
 // Vote casts a vote for the last message. Returns false if the user already voted.
@@ -168,20 +170,27 @@ func (ms *Messages) Serialize() {
 		return
 	}
 
+	inserted := 0
 	for _, m := range ms.newMessages {
 		id, err := ms.store.InsertMessage(m)
 		if err != nil {
-			log.Printf("ERROR inserting message: %v", err)
+			slog.Error("failed to insert message", "error", err)
 			continue
 		}
 		m.UID = id
+		inserted++
 	}
 
+	updated := 0
 	for _, m := range ms.changedMessages {
 		if err := ms.store.UpdateMessage(m); err != nil {
-			log.Printf("ERROR updating message: %v", err)
+			slog.Error("failed to update message", "error", err)
+		} else {
+			updated++
 		}
 	}
+
+	slog.Info("messages serialized", "inserted", inserted, "updated", updated)
 
 	ms.dirty = false
 	ms.newMessages = nil

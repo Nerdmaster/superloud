@@ -16,6 +16,12 @@ type Config struct {
 	IgnoresPath   string   `yaml:"ignores_path"`
 	WhitelistPath string   `yaml:"whitelist_path"`
 	AliasesPath   string   `yaml:"aliases_path"`
+	LogPath       string   `yaml:"log_path"`
+	LogMaxSizeMB  int      `yaml:"log_max_size_mb"`
+	LogMaxBackups int      `yaml:"log_max_backups"`
+	LogMaxAgeDays int      `yaml:"log_max_age_days"`
+	LogCompress   bool     `yaml:"log_compress"`
+	LogLevel      string   `yaml:"log_level"`
 }
 
 func Load(path string) (*Config, error) {
@@ -30,6 +36,12 @@ func Load(path string) (*Config, error) {
 		IgnoresPath:   "config/ignores.txt",
 		WhitelistPath: "config/whitelist.txt",
 		AliasesPath:   "config/aliases.yml",
+		LogPath:       "logs/superloud.log",
+		LogMaxSizeMB:  50,
+		LogMaxBackups: 3,
+		LogMaxAgeDays: 30,
+		LogCompress:   true,
+		LogLevel:      "info",
 	}
 
 	if err := yaml.Unmarshal(data, cfg); err != nil {
